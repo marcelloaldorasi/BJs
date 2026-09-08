@@ -22,17 +22,17 @@
    ===================================================================== */
 
 :root{
-  --ink:#ffffff;
-  --muted:rgba(255,255,255,.60);
-  --faint:rgba(255,255,255,.28);
+  --ink:#000000;
+  --muted:rgba(0,0,0,.66);
+  --faint:rgba(0,0,0,.34);
   --bj-red:#e15b41;          /* lighter cayenne (app accent) */
   --bj-red-bright:#ff7e60;   /* lighter cayenne highlight */
   --gold:#ffc24b;            /* price + savings accent */
-  --line:rgba(255,255,255,.10);
+  --line:rgba(0,0,0,.16);
 }
 
 *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
-html,body{height:100%; background:#00FFFF;}   /* chroma-key cyan (device keys this to transparent) */
+html,body{height:100%; background:transparent;}   /* fully transparent (test Option 1) */
 body{
   font-family:'Inter',system-ui,-apple-system,sans-serif;
   color:var(--ink);
@@ -43,7 +43,7 @@ body{
 .proto-frame{
   position:relative; aspect-ratio:9 / 16;
   height:min(100vh,calc(100vw * 16 / 9)); width:auto;
-  background:#00FFFF; overflow:hidden; container-type:size;
+  background:transparent; overflow:hidden; container-type:size;
 }
 
 /* one screen visible at a time */
@@ -73,7 +73,7 @@ body{
 #attract .tap{position:absolute; bottom:9cqh; left:50%; transform:translateX(-50%);
   display:flex; flex-direction:column; align-items:center; gap:2cqh;
   color:var(--faint); font-size:3.6cqw; letter-spacing:.06em; animation:pulse 2.6s ease-in-out infinite;}
-.tap .ring{width:11cqw; height:11cqw; border-radius:50%; border:.5cqw solid rgba(255,255,255,.35);
+.tap .ring{width:11cqw; height:11cqw; border-radius:50%; border:.5cqw solid rgba(0,0,0,.4);
   display:grid; place-items:center;}
 .tap .ring::after{content:""; width:3.4cqw; height:3.4cqw; border-radius:50%; background:var(--ink); opacity:.8;}
 
@@ -83,7 +83,7 @@ body{
 .app-head .bj-mark{width:11cqw;}
 .app-head .logo .sub{display:none;}
 .back{width:9.5cqw; height:9.5cqw; flex:0 0 auto; border-radius:50%;
-  border:.4cqw solid var(--line); background:#00FFFF; color:#fff; display:grid; place-items:center;
+  border:.4cqw solid var(--line); background:transparent; color:#000; display:grid; place-items:center;
   font-size:5cqw; cursor:pointer; transition:transform .15s ease, border-color .15s ease;}
 .back:active{transform:scale(.9); border-color:var(--bj-red-bright);}
 .head-titles{flex:1 1 auto; min-width:0;}
@@ -113,7 +113,7 @@ body{
 .promo-row .meta{display:flex; align-items:center; gap:2.4cqw; margin-top:1.9cqh; flex-wrap:wrap;}
 .chip{font-size:3cqw; font-weight:700; padding:1cqh 2.6cqw; border-radius:100px;}
 .chip.save{background:var(--gold); color:#1a1200;}
-.chip.count{color:#fff; border:.35cqw solid var(--line);}
+.chip.count{color:#000; border:.35cqw solid var(--line);}
 .promo-row .chev{align-self:center; color:var(--bj-red-bright); font-size:6cqw; flex:0 0 auto;}
 
 /* ===== PROMO DETAIL (product grid) ===== */
@@ -126,7 +126,7 @@ body{
 .prod:active{transform:scale(.97);}
 
 /* hologram stage — pure black, product floats with soft red glow + masked edges */
-.stage{position:relative; aspect-ratio:1; display:grid; place-items:center; background:#00FFFF; overflow:hidden;}
+.stage{position:relative; aspect-ratio:1; display:grid; place-items:center; background:transparent; overflow:hidden;}
 .stage .glowpad{display:none;}
 .stage .pimg{position:relative; width:94%; height:94%; object-fit:contain;
   -webkit-mask-image:radial-gradient(circle at 50% 47%, #000 58%, rgba(0,0,0,0) 82%);
@@ -134,19 +134,19 @@ body{
   animation:floaty 6s ease-in-out infinite;}
 .stage .tag3d{position:absolute; top:1.5cqw; left:1.5cqw; z-index:2; font-size:2.5cqw; font-weight:800;
   letter-spacing:.12em; padding:.6cqh 1.8cqw; border-radius:100px;
-  background:rgba(0,0,0,.6); border:.35cqw solid rgba(255,255,255,.25); color:var(--muted);}
+  background:rgba(0,0,0,.06); border:.35cqw solid rgba(0,0,0,.25); color:#000;}
 /* fallback puck if a product image fails to load */
 .stage .puck{display:none; width:46%; height:46%; border-radius:14%;
   background:linear-gradient(150deg, rgba(255,255,255,.16), rgba(255,255,255,.02));
-  border:.4cqw solid rgba(255,255,255,.14); place-items:center; color:#fff;
+  border:.4cqw solid rgba(0,0,0,.14); place-items:center; color:#000;
   font-family:'Archivo',sans-serif; font-weight:900; font-size:7cqw;
   box-shadow:0 6cqw 10cqw rgba(0,0,0,.6), inset 0 0 6cqw rgba(255,45,94,.25); animation:floaty 6s ease-in-out infinite;}
 
-.prod .name{font-size:8.5cqw; font-weight:600; line-height:1.15; margin-top:1.4cqh; min-height:29cqw;
-  display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;}
+.prod .name{font-size:4cqw; font-weight:600; line-height:1.22; margin-top:1.2cqh; min-height:9.8cqw;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
 .prod .price-row{display:flex; align-items:baseline; gap:2cqw; margin-top:1cqh; flex-wrap:wrap;}
 .prod .price{font-family:'Archivo',sans-serif; font-weight:900; font-size:6cqw; color:var(--gold);}
-.prod .save{font-size:2.9cqw; font-weight:700; color:#fff; background:var(--bj-red); padding:.5cqh 1.8cqw; border-radius:100px;}
+.prod .save{font-size:2.9cqw; font-weight:700; color:#000; background:var(--bj-red); padding:.5cqh 1.8cqw; border-radius:100px;}
 .prod .flag{margin-top:1.2cqh; font-size:2.8cqw; font-weight:700; letter-spacing:.03em; color:var(--bj-red-bright);}
 .prod.coupon .off{margin-top:1cqh; font-family:'Archivo',sans-serif; font-weight:900; font-size:5.4cqw; color:var(--gold);}
 .prod.coupon .clip{display:inline-block; margin-top:1cqh; font-size:2.9cqw; font-weight:800; letter-spacing:.08em;
@@ -157,15 +157,15 @@ body{
   display:flex; flex-direction:column; justify-content:flex-end;
   opacity:0; visibility:hidden; transition:opacity .3s ease, visibility 0s linear .3s;}
 #sheet.open{opacity:1; visibility:visible; transition:opacity .3s ease;}
-.sheet-body{background:#00FFFF; border-top:.5cqw solid rgba(255,126,96,.5); border-radius:7cqw 7cqw 0 0;
+.sheet-body{background:transparent; border-top:.5cqw solid rgba(255,126,96,.5); border-radius:7cqw 7cqw 0 0;
   padding:3cqh 6cqw 5cqh; transform:translateY(4cqh); transition:transform .3s ease; max-height:90%;
   display:flex; flex-direction:column;}
 #sheet.open .sheet-body{transform:none;}
-.sheet-grab{width:16cqw; height:1.2cqh; border-radius:100px; background:rgba(255,255,255,.22); margin:0 auto 2.5cqh;}
+.sheet-grab{width:16cqw; height:1.2cqh; border-radius:100px; background:rgba(0,0,0,.25); margin:0 auto 2.5cqh;}
 
 /* Big hologram stage — swap .model-stage contents for <model-viewer>/three.js when GLBs exist */
 .sheet-stage{position:relative; aspect-ratio:1; width:100%; overflow:hidden; margin-bottom:2.5cqh;
-  display:grid; place-items:center; background:#00FFFF;}
+  display:grid; place-items:center; background:transparent;}
 .sheet-stage .glowpad{display:none;}
 .sheet-stage .pimg{position:relative; width:82%; height:82%; object-fit:contain;
   -webkit-mask-image:radial-gradient(circle at 50% 47%, #000 60%, rgba(0,0,0,0) 84%);
@@ -179,7 +179,7 @@ body{
 .sheet .sheet-price .s{font-size:3.4cqw; font-weight:700; background:var(--bj-red); padding:.8cqh 3cqw; border-radius:100px;}
 .sheet .sheet-flag{margin-top:1.4cqh; color:var(--bj-red-bright); font-weight:700; font-size:3.4cqw;}
 .sheet .cta{margin-top:auto; padding-top:3cqh;}
-.sheet .cta button{width:100%; border:none; cursor:pointer; background:var(--bj-red); color:#fff;
+.sheet .cta button{width:100%; border:none; cursor:pointer; background:var(--bj-red); color:#000;
   font-family:'Archivo',sans-serif; font-weight:800; font-size:5cqw; letter-spacing:.02em;
   padding:2.4cqh 0; border-radius:100px; transition:transform .15s ease;}
 .sheet .cta button:active{transform:scale(.97);}
