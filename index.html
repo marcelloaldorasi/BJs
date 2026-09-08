@@ -3,467 +3,142 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>BJ's Wholesale · Proto Hologram</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<title>Proto Transparency Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
 <style>
 /* =====================================================================
-   BJ's WHOLESALE — Proto Hologram Promo Browser
-   Target device: Proto M / M2 · 1080 x 1920 (9:16 portrait)
-
-   HOLOGRAM RULE: on an additive holographic display, only PURE #000000
-   renders as transparent (invisible). Any non-black fill — near-black
-   greys, frosted panels, big glows — emits light and shows as a solid
-   floating block. So every surface here is pure #000; only real content
-   (product photos, text, logo, thin accent glows) carries light and
-   appears to float. Product photos come on white studio backgrounds, so
-   each is radially masked to fade its boxy edges into the void.
+   PROTO M — BACKGROUND TRANSPARENCY TEST HARNESS
+   Cycles the page background through the realistic ways a device player
+   makes web content see-through. Only the BACKGROUND changes between
+   options; the floating foreground (logo + shapes) stays identical so
+   you can judge whether the empty area around it drops out on the device.
+   Report which OPTION number goes transparent.
    ===================================================================== */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{font-family:'Inter',system-ui,sans-serif;color:#fff;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;}
 
-:root{
-  --ink:#ffffff;
-  --muted:rgba(255,255,255,.60);
-  --faint:rgba(255,255,255,.28);
-  --bj-red:#d31242;          /* BJ's brand red (official logo) */
-  --bj-red-bright:#ff2d5e;   /* holographic glow */
-  --gold:#ffc24b;            /* price + savings accent */
-  --line:rgba(255,255,255,.10);
-}
+/* The device frame. #bg is the layer we recolor per option. */
+.frame{position:relative;aspect-ratio:9/16;height:min(100vh,calc(100vw*16/9));width:auto;overflow:hidden;}
+#bg{position:absolute;inset:0;z-index:0;}   /* background under test */
 
-*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
-html,body{height:100%; background:#000;}   /* pure black = transparent on device */
-body{
-  font-family:'Inter',system-ui,-apple-system,sans-serif;
-  color:var(--ink);
-  display:flex; align-items:center; justify-content:center; overflow:hidden;
-}
+/* ---- FOREGROUND: identical across every option ---- */
+.fg{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:8cqw;pointer-events:none;}
+.fg .bj-mark{width:34cqw;height:auto;aspect-ratio:58/51;filter:drop-shadow(0 0 5cqw rgba(255,45,94,.5));
+  animation:floaty 5s ease-in-out infinite;}
+.fg .shapes{display:flex;gap:5cqw;align-items:center;margin-top:6cqh;}
+.fg .bar{width:26cqw;height:10cqw;border-radius:3cqw;background:#d31242;box-shadow:0 0 6cqw rgba(255,45,94,.6);}
+.fg .ring{width:16cqw;height:16cqw;border-radius:50%;border:2.4cqw solid #ffc24b;box-shadow:0 0 6cqw rgba(255,194,75,.55);}
+.fg .dot{width:9cqw;height:9cqw;border-radius:50%;background:#fff;}
+.fg .q{margin-top:7cqh;font-size:3.6cqw;color:rgba(255,255,255,.85);max-width:70cqw;line-height:1.4;}
+.fg .q b{color:#ffc24b;}
 
-/* Device frame: locks content to Proto's 9:16 portrait */
-.proto-frame{
-  position:relative; aspect-ratio:9 / 16;
-  height:min(100vh,calc(100vw * 16 / 9)); width:auto;
-  background:#000; overflow:hidden; container-type:size;
-}
+/* ---- HUD: option label + controls (this is UI chrome, not the test bg) ---- */
+.hud{position:absolute;z-index:2;left:0;right:0;top:0;padding:4cqh 5cqw 3cqh;
+  display:flex;flex-direction:column;align-items:center;gap:1cqh;
+  background:linear-gradient(#000,rgba(0,0,0,0));}
+.hud .opt-num{font-family:'Archivo',sans-serif;font-weight:900;font-size:8cqw;line-height:1;}
+.hud .opt-name{font-family:'Archivo',sans-serif;font-weight:800;font-size:4.4cqw;color:#ffc24b;text-align:center;}
+.hud .opt-css{font-family:ui-monospace,monospace;font-size:3.1cqw;color:rgba(255,255,255,.7);margin-top:.4cqh;
+  background:rgba(255,255,255,.08);padding:.6cqh 2.4cqw;border-radius:100px;}
 
-/* one screen visible at a time */
-.screen{
-  position:absolute; inset:0; display:flex; flex-direction:column;
-  opacity:0; visibility:hidden; transform:translateY(1.2cqh);
-  transition:opacity .45s ease, transform .45s ease, visibility 0s linear .45s;
-}
-.screen.active{opacity:1; visibility:visible; transform:none;
-  transition:opacity .45s ease, transform .45s ease;}
+.tray{position:absolute;z-index:2;left:0;right:0;bottom:0;padding:3cqh 4cqw 5cqh;
+  display:flex;flex-direction:column;gap:2.4cqh;background:linear-gradient(rgba(0,0,0,0),#000 40%);}
+.nums{display:flex;gap:2.2cqw;justify-content:center;flex-wrap:wrap;}
+.nums button{width:12cqw;height:12cqw;border-radius:50%;border:.5cqw solid rgba(255,255,255,.3);
+  background:rgba(255,255,255,.06);color:#fff;font-family:'Archivo',sans-serif;font-weight:800;font-size:5cqw;cursor:pointer;
+  transition:transform .12s ease,background .12s ease,border-color .12s ease;}
+.nums button:active{transform:scale(.9);}
+.nums button.active{background:#d31242;border-color:#ff2d5e;box-shadow:0 0 5cqw rgba(255,45,94,.7);}
+.arrows{display:flex;gap:3cqw;}
+.arrows button{flex:1;border:none;border-radius:100px;background:rgba(255,255,255,.1);color:#fff;
+  font-family:'Archivo',sans-serif;font-weight:800;font-size:4.4cqw;padding:2.2cqh 0;cursor:pointer;}
+.arrows button:active{background:rgba(255,255,255,.2);}
 
-/* ===== LOGO (official monogram, reused via <use>) ===== */
-.logo{display:inline-flex; flex-direction:column; align-items:center; line-height:.9;}
-.bj-mark{display:block; width:100%; height:auto; aspect-ratio:58 / 51;}
-.logo .sub{margin-top:.5em; font-family:'Archivo',sans-serif; font-weight:700;
-  letter-spacing:.42em; text-indent:.42em; color:var(--muted);}
-
-/* ===== ATTRACT / LANDING ===== */
-#attract{align-items:center; justify-content:center; text-align:center; cursor:pointer; padding:8cqw;}
-#attract .bj-mark{width:34cqw; filter:drop-shadow(0 0 6cqw rgba(255,45,94,.55));}
-#attract .logo .sub{font-size:3.3cqw;}
-#attract .hero-float{animation:floaty 5.5s ease-in-out infinite;}
-#attract .tagline{margin-top:7cqh; font-family:'Archivo',sans-serif; font-weight:800;
-  font-size:9cqw; letter-spacing:-.01em; text-shadow:0 0 7cqw rgba(255,45,94,.35);}
-#attract .tagline em{color:var(--gold); font-style:normal;}
-#attract .sub-tag{margin-top:1.6cqh; color:var(--muted); font-size:4cqw; max-width:72cqw;}
-#attract .tap{position:absolute; bottom:9cqh; left:50%; transform:translateX(-50%);
-  display:flex; flex-direction:column; align-items:center; gap:2cqh;
-  color:var(--faint); font-size:3.6cqw; letter-spacing:.06em; animation:pulse 2.6s ease-in-out infinite;}
-.tap .ring{width:11cqw; height:11cqw; border-radius:50%; border:.5cqw solid rgba(255,255,255,.35);
-  display:grid; place-items:center;}
-.tap .ring::after{content:""; width:3.4cqw; height:3.4cqw; border-radius:50%; background:var(--ink); opacity:.8;}
-
-/* ===== APP HEADER ===== */
-.app-head{flex:0 0 auto; display:flex; align-items:center; gap:3cqw; padding:5cqh 5cqw 2cqh;}
-.app-head .logo{flex-direction:row; align-items:center;}
-.app-head .bj-mark{width:11cqw; filter:drop-shadow(0 0 3cqw rgba(255,45,94,.5));}
-.app-head .logo .sub{display:none;}
-.back{width:9.5cqw; height:9.5cqw; flex:0 0 auto; border-radius:50%;
-  border:.4cqw solid var(--line); background:#000; color:#fff; display:grid; place-items:center;
-  font-size:5cqw; cursor:pointer; transition:transform .15s ease, border-color .15s ease;}
-.back:active{transform:scale(.9); border-color:var(--bj-red-bright);}
-.head-titles{flex:1 1 auto; min-width:0;}
-.head-eyebrow{font-size:3cqw; letter-spacing:.28em; color:var(--bj-red-bright); font-weight:700;}
-.head-title{font-family:'Archivo',sans-serif; font-weight:800; font-size:6.6cqw; letter-spacing:-.01em;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-
-/* ===== SCROLL AREA ===== */
-.scroll{flex:1 1 auto; overflow-y:auto; overflow-x:hidden; padding:1cqh 5cqw 8cqh; scrollbar-width:none;}
-.scroll::-webkit-scrollbar{display:none;}
-
-/* ===== PROMO HOME ===== */
-.home-lead{padding:1cqh 0 3cqh;}
-.home-lead h1{font-family:'Archivo',sans-serif; font-weight:900; font-size:11cqw; line-height:.98; letter-spacing:-.02em;}
-.home-lead h1 em{color:var(--gold); font-style:normal;}
-.home-lead p{margin-top:1.4cqh; color:var(--muted); font-size:3.9cqw; max-width:78cqw;}
-
-.promo-row{position:relative; display:flex; align-items:flex-start; gap:3.5cqw;
-  width:100%; text-align:left; cursor:pointer; background:transparent; border:none;
-  padding:3.4cqh 0; border-top:.35cqw solid var(--line);
-  transition:opacity .15s ease;}
-.promo-row:active{opacity:.6;}
-.promo-row .emoji{font-size:9cqw; line-height:1; filter:drop-shadow(0 0 3cqw rgba(255,45,94,.35)); flex:0 0 auto;}
-.promo-row .body{flex:1 1 auto; min-width:0;}
-.promo-row h2{font-family:'Archivo',sans-serif; font-weight:800; font-size:6cqw; letter-spacing:-.01em;}
-.promo-row .blurb{color:var(--muted); font-size:3.6cqw; margin-top:.7cqh; line-height:1.34;}
-.promo-row .meta{display:flex; align-items:center; gap:2.4cqw; margin-top:1.9cqh; flex-wrap:wrap;}
-.chip{font-size:3cqw; font-weight:700; padding:1cqh 2.6cqw; border-radius:100px;}
-.chip.save{background:var(--gold); color:#1a1200;}
-.chip.count{color:#fff; border:.35cqw solid var(--line);}
-.promo-row .chev{align-self:center; color:var(--bj-red-bright); font-size:6cqw; flex:0 0 auto;
-  filter:drop-shadow(0 0 2cqw rgba(255,45,94,.6));}
-
-/* ===== PROMO DETAIL (product grid) ===== */
-.detail-lead{color:var(--muted); font-size:3.9cqw; line-height:1.4; padding:.5cqh 0 3cqh; max-width:82cqw;}
-.detail-lead strong{color:var(--gold); font-weight:700;}
-.grid{display:grid; grid-template-columns:1fr 1fr; gap:5cqw 4cqw;}
-
-.prod{position:relative; text-align:left; cursor:pointer; background:transparent; border:none; padding:0;
-  transition:transform .16s ease;}
-.prod:active{transform:scale(.97);}
-
-/* hologram stage — pure black, product floats with soft red glow + masked edges */
-.stage{position:relative; aspect-ratio:1; display:grid; place-items:center; background:#000; overflow:hidden;}
-.stage .glowpad{position:absolute; width:74%; height:74%; border-radius:50%;
-  background:radial-gradient(closest-side, rgba(255,45,94,.20), rgba(0,0,0,0) 72%); filter:blur(2px);}
-.stage .pimg{position:relative; width:94%; height:94%; object-fit:contain;
-  -webkit-mask-image:radial-gradient(circle at 50% 47%, #000 58%, rgba(0,0,0,0) 82%);
-          mask-image:radial-gradient(circle at 50% 47%, #000 58%, rgba(0,0,0,0) 82%);
-  filter:drop-shadow(0 3cqw 4cqw rgba(0,0,0,.65));
-  animation:floaty 6s ease-in-out infinite;}
-.stage .tag3d{position:absolute; top:1.5cqw; left:1.5cqw; z-index:2; font-size:2.5cqw; font-weight:800;
-  letter-spacing:.12em; padding:.6cqh 1.8cqw; border-radius:100px;
-  background:rgba(0,0,0,.6); border:.35cqw solid rgba(255,255,255,.25); color:var(--muted);}
-/* fallback puck if a product image fails to load */
-.stage .puck{display:none; width:46%; height:46%; border-radius:14%;
-  background:linear-gradient(150deg, rgba(255,255,255,.16), rgba(255,255,255,.02));
-  border:.4cqw solid rgba(255,255,255,.14); place-items:center; color:#fff;
-  font-family:'Archivo',sans-serif; font-weight:900; font-size:7cqw;
-  box-shadow:0 6cqw 10cqw rgba(0,0,0,.6), inset 0 0 6cqw rgba(255,45,94,.25); animation:floaty 6s ease-in-out infinite;}
-
-.prod .name{font-size:3.5cqw; font-weight:600; line-height:1.28; margin-top:1cqh; min-height:8.8cqw;
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
-.prod .price-row{display:flex; align-items:baseline; gap:2cqw; margin-top:1cqh; flex-wrap:wrap;}
-.prod .price{font-family:'Archivo',sans-serif; font-weight:900; font-size:6cqw; color:var(--gold);}
-.prod .save{font-size:2.9cqw; font-weight:700; color:#fff; background:var(--bj-red); padding:.5cqh 1.8cqw; border-radius:100px;}
-.prod .flag{margin-top:1.2cqh; font-size:2.8cqw; font-weight:700; letter-spacing:.03em; color:var(--bj-red-bright);}
-.prod.coupon .off{margin-top:1cqh; font-family:'Archivo',sans-serif; font-weight:900; font-size:5.4cqw; color:var(--gold);}
-.prod.coupon .clip{display:inline-block; margin-top:1cqh; font-size:2.9cqw; font-weight:800; letter-spacing:.08em;
-  color:var(--bj-red-bright); border:.35cqw solid var(--bj-red); border-radius:100px; padding:.7cqh 2.6cqw;}
-
-/* ===== PRODUCT SHEET (3D hook) ===== */
-#sheet{position:absolute; inset:0; z-index:20; background:rgba(0,0,0,.62); backdrop-filter:blur(6px);
-  display:flex; flex-direction:column; justify-content:flex-end;
-  opacity:0; visibility:hidden; transition:opacity .3s ease, visibility 0s linear .3s;}
-#sheet.open{opacity:1; visibility:visible; transition:opacity .3s ease;}
-.sheet-body{background:#000; border-top:.5cqw solid rgba(255,45,94,.55); border-radius:7cqw 7cqw 0 0;
-  padding:3cqh 6cqw 5cqh; transform:translateY(4cqh); transition:transform .3s ease; max-height:90%;
-  display:flex; flex-direction:column;}
-#sheet.open .sheet-body{transform:none;}
-.sheet-grab{width:16cqw; height:1.2cqh; border-radius:100px; background:rgba(255,255,255,.22); margin:0 auto 2.5cqh;}
-
-/* Big hologram stage — swap .model-stage contents for <model-viewer>/three.js when GLBs exist */
-.sheet-stage{position:relative; aspect-ratio:1; width:100%; overflow:hidden; margin-bottom:2.5cqh;
-  display:grid; place-items:center; background:#000;}
-.sheet-stage .glowpad{position:absolute; width:70%; height:70%; border-radius:50%;
-  background:radial-gradient(closest-side, rgba(255,45,94,.22), rgba(0,0,0,0) 72%); filter:blur(3px);}
-.sheet-stage .pimg{position:relative; width:82%; height:82%; object-fit:contain;
-  -webkit-mask-image:radial-gradient(circle at 50% 47%, #000 60%, rgba(0,0,0,0) 84%);
-          mask-image:radial-gradient(circle at 50% 47%, #000 60%, rgba(0,0,0,0) 84%);
-  filter:drop-shadow(0 4cqw 6cqw rgba(0,0,0,.7)); animation:floaty 6.5s ease-in-out infinite;}
-.sheet-stage .stage-note{position:absolute; bottom:1.5cqw; left:0; right:0; text-align:center;
-  font-size:2.8cqw; letter-spacing:.1em; color:var(--faint);}
-.sheet h3{font-family:'Archivo',sans-serif; font-weight:800; font-size:6cqw; line-height:1.15;}
-.sheet .sheet-price{display:flex; align-items:baseline; gap:3cqw; margin-top:1.6cqh; flex-wrap:wrap;}
-.sheet .sheet-price .p{font-family:'Archivo',sans-serif; font-weight:900; font-size:10cqw; color:var(--gold);}
-.sheet .sheet-price .s{font-size:3.4cqw; font-weight:700; background:var(--bj-red); padding:.8cqh 3cqw; border-radius:100px;}
-.sheet .sheet-flag{margin-top:1.4cqh; color:var(--bj-red-bright); font-weight:700; font-size:3.4cqw;}
-.sheet .cta{margin-top:auto; padding-top:3cqh;}
-.sheet .cta button{width:100%; border:none; cursor:pointer; background:var(--bj-red); color:#fff;
-  font-family:'Archivo',sans-serif; font-weight:800; font-size:5cqw; letter-spacing:.02em;
-  padding:2.4cqh 0; border-radius:100px; box-shadow:0 0 8cqw rgba(255,45,94,.5); transition:transform .15s ease;}
-.sheet .cta button:active{transform:scale(.97);}
-.sheet .cta .hint{text-align:center; color:var(--faint); font-size:3cqw; margin-top:1.4cqh;}
-
-/* ===== ANIMATIONS ===== */
-@keyframes floaty{0%,100%{transform:translateY(0)} 50%{transform:translateY(-5%)}}
-@keyframes pulse{0%,100%{opacity:.5} 50%{opacity:1}}
-@media (prefers-reduced-motion: reduce){ *{animation:none !important;} }
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-5%)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;}}
 </style>
 </head>
 <body>
-<div class="proto-frame" id="app">
+<div class="frame" id="frame">
+  <div id="bg"></div>
 
-  <!-- Official BJ's monogram — defined once, reused via <use> -->
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-    <symbol id="bjs-mark" viewBox="0 0 58 51">
+  <div class="fg">
+    <svg class="bj-mark" viewBox="0 0 58 51" role="img" aria-label="BJ's">
       <path d="M10.4462 37.5187H7.75975V29.8315H10.3463C12.9844 29.8315 13.5803 31.9631 13.5803 33.6993C13.5803 35.8309 12.6334 37.5187 10.4462 37.5187ZM7.75975 16.6882H10.4462C12.4852 16.6882 13.4291 18.1737 13.4291 19.9612C13.4291 21.7486 12.6334 23.2372 10.546 23.2372H7.75975V16.6912V16.6882ZM16.663 26.012C19.9969 24.774 21.3885 21.498 21.3885 18.373C21.3885 12.0233 17.2106 9.8916 12.3854 9.8916H0V44.4633H11.986C18.9017 44.4633 22.4322 40.0973 22.4322 33.7989C22.4322 29.6322 19.5975 26.9057 16.663 26.012Z" fill="#D31242"/>
       <path d="M26.1866 35.3414C26.1866 39.5142 24.6709 42.8355 21.691 44.635L26.5314 50.9998L28.4706 49.3724C31.4323 46.7003 33.8223 41.987 33.8223 37.0292V9.90332H26.1049L26.1866 35.3414Z" fill="#D31242"/>
       <path d="M39.1104 21.3953C39.1104 21.3953 42.6348 15.9483 47.9502 10.0787C49.3448 8.54186 50.7788 7.04727 52.1159 5.6946C55.353 2.41558 58 -0.00292969 58 -0.00292969C58 -0.00292969 53.4289 2.55447 49.1784 5.68856C49.012 5.80934 48.8487 5.93011 48.6883 6.05089C43.7995 9.72545 40.5262 12.9531 40.5262 12.9531L36.8052 9.15479L39.1044 21.2564L39.1104 21.3923V21.3953Z" fill="#D31242"/>
       <path d="M45.7024 28.8169C45.6994 27.7903 46.8187 27.3676 48.0621 27.425C49.72 27.5005 51.0904 28.4123 52.7512 29.2638L55.002 23.9376C52.6817 22.7057 50.5943 21.7305 47.0396 21.7305C41.9209 21.7305 38.6476 25.0004 38.6476 29.5083C38.6476 36.9058 48.5764 34.2367 48.5764 37.9746C48.5764 38.7808 47.7203 39.4088 46.489 39.4088C44.453 39.4088 41.6879 37.884 40.0271 36.8001L37.5585 42.4312C40.499 44.1764 43.4849 45.0671 46.374 45.0671C52.0131 45.0671 55.8582 42.0055 55.8582 37.247C55.8582 29.4661 45.7297 32.2741 45.7055 28.8169" fill="#D31242"/>
       <path d="M54.0127 18.2067C54.0127 19.0552 53.3683 19.7375 52.5636 19.7315C51.7619 19.7315 51.1085 19.0582 51.1085 18.2007C51.1085 17.3432 51.7619 16.6759 52.5545 16.6759H52.5636C53.3683 16.6759 54.0097 17.3583 54.0127 18.2097M52.5575 16.3951C51.5683 16.3951 50.7666 17.1983 50.7666 18.2007C50.7666 19.2031 51.5683 20.0153 52.5575 20.0153C53.5468 20.0153 54.3455 19.2182 54.3455 18.2007C54.3455 17.1832 53.5559 16.3951 52.5666 16.3921H52.5575V16.3951Z" fill="#D31242"/>
       <path d="M52.9418 17.7899C52.9418 18.0375 52.7179 18.1341 52.4517 18.1341H52.2187V17.4517C52.2732 17.4457 52.3488 17.4336 52.4517 17.4366C52.8147 17.4366 52.9418 17.6148 52.9418 17.7899ZM51.8981 17.2343V19.2483H52.2187V18.3817H52.4426C52.7028 18.3817 52.8298 18.4783 52.8752 18.735C52.9176 19.0007 52.963 19.1849 53.0144 19.2483H53.3532C53.3199 19.1849 53.2715 19.0641 53.2231 18.7501C53.1838 18.4542 53.0628 18.2941 52.8873 18.2609V18.2458C53.1051 18.1824 53.2806 18.0224 53.2806 17.7567C53.2806 17.5635 53.2171 17.4276 53.093 17.34C52.9751 17.2494 52.7724 17.186 52.4698 17.186C52.2308 17.186 52.0675 17.2102 51.8981 17.2343Z" fill="#D31242"/>
-    </symbol>
-  </svg>
-
-  <!-- ============== ATTRACT / LANDING ============== -->
-  <section class="screen active" id="attract" onclick="go('home')">
-    <div class="hero-float">
-      <div class="logo">
-        <svg class="bj-mark" role="img" aria-label="BJ's Wholesale Club"><use href="#bjs-mark"></use></svg>
-        <span class="sub">WHOLESALE CLUB</span>
-      </div>
-    </div>
-    <div class="tagline">Today's <em>Deals</em></div>
-    <div class="sub-tag">Member savings, in 3D. Browse this week's featured offers.</div>
-    <div class="tap"><div class="ring"></div><span>TAP TO EXPLORE</span></div>
-  </section>
-
-  <!-- ============== PROMO HOME ============== -->
-  <section class="screen" id="home">
-    <div class="app-head">
-      <div class="logo"><svg class="bj-mark" role="img" aria-label="BJ's Wholesale Club"><use href="#bjs-mark"></use></svg></div>
-    </div>
-    <div class="scroll">
-      <div class="home-lead"><h1>This Week's<br><em>Savings</em></h1><p>Tap any event to see the deals inside.</p></div>
-      <div id="promo-list"></div>
-    </div>
-  </section>
-
-  <!-- ============== PROMO DETAIL ============== -->
-  <section class="screen" id="detail">
-    <div class="app-head">
-      <button class="back" onclick="go('home')" aria-label="Back">&#8592;</button>
-      <div class="head-titles"><div class="head-eyebrow">BJ'S DEALS</div><div class="head-title" id="detail-title">Promo</div></div>
-    </div>
-    <div class="scroll">
-      <p class="detail-lead" id="detail-lead"></p>
-      <div class="grid" id="product-grid"></div>
-    </div>
-  </section>
-
-  <!-- ============== PRODUCT SHEET (future 3D lives here) ============== -->
-  <div id="sheet" onclick="if(event.target.id==='sheet') closeSheet()">
-    <div class="sheet-body">
-      <div class="sheet-grab"></div>
-      <!-- 3D HOOK: replace the <img> below with a real 3D viewer when GLBs exist, e.g.
-           <model-viewer src="models/{item}.glb" camera-controls auto-rotate ar
-             style="width:100%;height:100%"></model-viewer>
-           Each product already carries an optional `model` field to point at the asset. -->
-      <div class="sheet-stage">
-        <div class="glowpad"></div>
-        <img class="pimg" id="sheet-img" alt="" />
-        <div class="stage-note" id="sheet-note">3D MODEL COMING SOON · PLACEHOLDER</div>
-      </div>
-      <h3 id="sheet-name">Product</h3>
-      <div class="sheet-price"><span class="p" id="sheet-price">$0.00</span><span class="s" id="sheet-save" style="display:none"></span></div>
-      <div class="sheet-flag" id="sheet-flag"></div>
-      <div class="cta">
-        <button id="sheet-btn" onclick="closeSheet()">Add to Cart</button>
-        <div class="hint">Prices reflect current in-club &amp; online offers.</div>
-      </div>
-    </div>
+    </svg>
+    <div class="shapes"><div class="bar"></div><div class="ring"></div><div class="dot"></div></div>
+    <div class="q">Does the area <b>around</b> these shapes disappear on the Proto?<br>If yes, this option is the one.</div>
   </div>
 
+  <div class="hud">
+    <div class="opt-num" id="opt-num">1</div>
+    <div class="opt-name" id="opt-name"></div>
+    <div class="opt-css" id="opt-css"></div>
+  </div>
+
+  <div class="tray">
+    <div class="nums" id="nums"></div>
+    <div class="arrows">
+      <button onclick="step(-1)">‹ PREV</button>
+      <button onclick="step(1)">NEXT ›</button>
+    </div>
+  </div>
 </div>
 
 <script>
-/* =====================================================================
-   DATA — real BJ's promotions, products, prices & item numbers pulled
-   from bjs.com (Sep 2026). Images are served from BJ's Scene7 CDN by
-   item number. `model` is reserved for a future 3D asset per product.
-   ===================================================================== */
-const S7 = 'https://bjs.scene7.com/is/image/bjs/';
-const IMG = (item, size) => `${S7}${item}?$bjs-${size}$`;
-
-const PROMOS = [
-  { id:"labor-day", emoji:"🎉", title:"Labor Day Savings Event",
-    blurb:"Long Weekend Deals — up to 40% off + FREE delivery on select.",
-    save:"Up to 40% off", count:"6 deals",
-    lead:"Party-ready grocery and outdoor must-haves for hosting the cookout. <strong>FREE delivery on select items.</strong>",
-    products:[
-      {item:"341661", name:"Sealy Icon Esler Firm Queen Mattress", price:"$499.99", save:"$100 off", flag:"FREE Delivery Today"},
-      {item:"341214", name:"Sealy Icon Cayson Medium Queen Mattress", price:"$599.99", save:"$100 off"},
-      {item:"343296", name:"Serta Five Star Sleep to Go 10\" Medium (Select Size)", price:"$169.99", save:"$75 off"},
-      {item:"16852",  name:"Pepsi Cola Cans, 36 ct.", price:"$17.09", flag:"Double Coupons"},
-      {item:"336801", name:"Polar Seltzer Variety Pack, 30 pk.", price:"$12.29", save:"$3 off"},
-      {item:"311472", name:"Berkley Jensen Queen Size Foundation", price:"$159.99", flag:"FREE Delivery Today"}
-    ]},
-  { id:"college", emoji:"🎓", title:"College",
-    blurb:"Up to 30% off dorm furniture + FREE same-day delivery on select.",
-    save:"Up to 30% off", count:"6 deals",
-    lead:"Everything for move-in — furniture, mattresses and dorm essentials. <strong>FREE same-day delivery on select.</strong>",
-    products:[
-      {item:"311477", name:"Berkley Jensen Camille Twin Size Mattress", price:"$149.99", save:"$20 off", flag:"FREE Delivery Today"},
-      {item:"347562", name:"Zinus 10\" Cooling Gel Plush Hybrid Mattress (Select Size)", price:"$379.99"},
-      {item:"305808", name:"Novaform 12\" Full Cooling Gel Memory Foam Mattress", price:"$229.98"},
-      {item:"342134", name:"Rize Home EZ Foundation Box Spring - King", price:"$179.99"},
-      {item:"347177", name:"Zinus 9\" No Assembly Mattress Foundation (Select Size)", price:"$259.99"},
-      {item:"311470", name:"Berkley Jensen Twin Size Foundation", price:"$139.99", flag:"FREE Delivery Today"}
-    ]},
-  { id:"back-to-school", emoji:"✏️", title:"Back to School",
-    blurb:"Back to School deals + FREE shipping on select supplies and tech.",
-    save:"FREE shipping", count:"6 deals",
-    lead:"Stock up on supplies for the year ahead. <strong>FREE shipping on select school supplies.</strong>",
-    products:[
-      {item:"325827", name:"Crayola Colored Pencils, 50 ct.", price:"$5.99", save:"$1 off", flag:"FREE Shipping"},
-      {item:"326235", name:"Sharpie Permanent Markers, Assorted, 21 ct.", price:"$10.99", save:"$3 off", flag:"FREE Shipping"},
-      {item:"330684", name:"Pilot G2 Gel Pens, 14 ct., Black", price:"$12.99", save:"$2 off", flag:"FREE Shipping"},
-      {item:"325825", name:"Five Star Wirebound Notebook, College Ruled, 2 pk.", price:"$4.87", save:"$1.62 off", flag:"FREE Shipping"},
-      {item:"709093", name:"Ticonderoga #2 Sharpened Pencils, 72 ct.", price:"$10.99", flag:"FREE Shipping"},
-      {item:"330475", name:"Westcott 8\" Titanium Bonded Scissors, 3 pk.", price:"$8.99", save:"$1 off", flag:"FREE Shipping"}
-    ]},
-  { id:"halloween", emoji:"🎃", title:"Halloween",
-    blurb:"Spooky savings on Halloween candy, decor and party supplies.",
-    save:"Bulk savings", count:"6 deals",
-    lead:"Bulk candy and treats to be the house everyone talks about. <strong>New arrivals landing weekly.</strong>",
-    products:[
-      {item:"356323", name:"Reese's PB Snack Size Assorted Shapes Candy, 65 ct.", price:"$16.49", flag:"Best Seller"},
-      {item:"326308", name:"M&M's Fun Size Chocolate Candy Variety Pack, 90 ct.", price:"$17.99", save:"$3 off"},
-      {item:"339705", name:"Werther's Limited Edition Harvest Caramel, 28 oz.", price:"$7.99", save:"$2 off"},
-      {item:"356488", name:"Ghirardelli Chocolate Jack-O-Lanterns, 12.4 oz.", price:"$14.99", flag:"New Arrival"},
-      {item:"19312",  name:"Snickers, Twix & More Full-Size Variety, 30 ct.", price:"$29.99", save:"$4 off", flag:"FREE Shipping"},
-      {item:"28371",  name:"Tootsie Roll Pops, 100 ct.", price:"$14.99", save:"$1 off"}
-    ]},
-  { id:"fuel-saver", emoji:"⛽", title:"Fuel Saver Event",
-    blurb:"Shop 100+ participating items. Save 10¢/gal for each one.",
-    save:"10¢/gal each", count:"6 deals",
-    lead:"Buy participating everyday essentials and <strong>save 10¢ per gallon at BJ's Gas for each one</strong> — savings stack.",
-    products:[
-      {item:"241915", name:"Clorox Disinfecting Wipes Value Pack, 85 ct./5 pk.", price:"$18.99", save:"$3.50 off"},
-      {item:"16852",  name:"Pepsi Cola Cans, 36 ct.", price:"$17.09", flag:"Double Coupons"},
-      {item:"38045",  name:"Coca-Cola Soda Cans, 35 pk./12 fl. oz.", price:"$19.29"},
-      {item:"235070", name:"Welch's Fruit Snacks, Snack Packs, 90 ct.", price:"$12.99", save:"$3 off"},
-      {item:"53620",  name:"Wellsley Farms Purified Water, 40 pk.", price:"$3.99"},
-      {item:"28541",  name:"Kool-Aid Jammers Variety Pack, 40 pk.", price:"$9.99", save:"$1.50 off"}
-    ]},
-  { id:"flavors-of-fall", emoji:"🍂", title:"Flavors of Fall",
-    blurb:"Member favorites for the season — snack and stock up.",
-    save:"Member favorites", count:"6 deals",
-    lead:"Seasonal member favorites, from bakery treats to pantry staples.",
-    products:[
-      {item:"312395", name:"Wellsley Farms Fall Brownie Platter, 15 ct.", price:"$7.99"},
-      {item:"357275", name:"Graza Sizzle Extra Virgin Olive Oil, 1L", price:"$16.49", save:"$2 off"},
-      {item:"19256",  name:"Honey Maid Honey Graham Crackers, 4 pk.", price:"$8.99", save:"$2 off"},
-      {item:"355870", name:"Ghirardelli Milk & Dark Chocolate Squares, 15.7 oz.", price:"$14.99"},
-      {item:"34998",  name:"Deer Park 100% Natural Spring Water, 40 pk.", price:"$6.99"},
-      {item:"24925",  name:"York Dark Chocolate Peppermint Patties, 175 pk.", price:"$23.99"}
-    ]},
-  { id:"new-trending", emoji:"🔥", title:"New & Trending",
-    blurb:"Fresh arrivals members are loving right now.",
-    save:"Just landed", count:"6 deals",
-    lead:"The newest picks across grocery, home and pop culture.",
-    products:[
-      {item:"352940", name:"Netflix KPop Demon Hunters School Supply Kit, 8-Pc.", price:"$9.99", save:"$10 off", flag:"New"},
-      {item:"356488", name:"Ghirardelli Chocolate Jack-O-Lanterns, 12.4 oz.", price:"$14.99", flag:"New Arrival"},
-      {item:"355271", name:"Snickers Satisfying Mix Full-Size Bars, 12 ct.", price:"$10.99", save:"$2 off", flag:"New"},
-      {item:"357275", name:"Graza Sizzle Extra Virgin Olive Oil, 1L", price:"$16.49", save:"$2 off"},
-      {item:"356272", name:"Fiorella Assorted Milk Chocolate Premium, 17.64 oz.", price:"$14.99", flag:"New"},
-      {item:"356036", name:"Crayola Young Kids 2-in-1 Doodle Board", price:"$8.99", save:"$4 off", flag:"New"}
-    ]},
-  { id:"coupons", emoji:"✂️", coupon:true, title:"Trending Coupons",
-    blurb:"Clip to card — savings apply automatically at checkout.",
-    save:"Clip & save", count:"6 coupons",
-    lead:"Clip these to your membership card and they apply automatically in-club, online or in the app.",
-    products:[
-      {item:"326308", name:"M&M's Fun Size Chocolate Variety Pack, 90 ct.", off:"$3.00 off"},
-      {item:"343327", name:"Hershey Assorted Milk Chocolate Value Pack, 210 ct.", off:"$2.50 off"},
-      {item:"241915", name:"Clorox Disinfecting Wipes, 85 ct./5 pk.", off:"$3.50 off"},
-      {item:"235070", name:"Welch's Fruit Snacks, 90 ct.", off:"$3.00 off"},
-      {item:"326235", name:"Sharpie Permanent Markers, 21 ct.", off:"$3.00 off"},
-      {item:"226479", name:"Tootsie Roll Favorites Variety Pack, 4.75 lbs.", off:"$1.00 off"}
-    ]}
+/* Each option changes ONLY the background. `bg` is applied to <html>, <body>
+   and #bg so whichever surface the Proto player samples is covered. */
+const OPTIONS = [
+  { name:"Transparent (alpha 0)",      css:"background: transparent",        bg:"transparent" },
+  { name:"Pure Black (control)",       css:"background: #000000",            bg:"#000000" },
+  { name:"Chroma Key — Green",         css:"background: #00FF00",            bg:"#00FF00" },
+  { name:"Chroma Key — Magenta",       css:"background: #FF00FF",            bg:"#FF00FF" },
+  { name:"Chroma Key — Blue",          css:"background: #0000FF",            bg:"#0000FF" },
+  { name:"Chroma Key — Cyan",          css:"background: #00FFFF",            bg:"#00FFFF" }
 ];
 
-/* ===== RENDER + ROUTER ===== */
-const $ = s => document.querySelector(s);
-const ERR = "this.style.display='none';this.parentNode.querySelector('.puck').style.display='grid';";
+let idx = 0;
+const numsEl = document.getElementById('nums');
+const bgEl   = document.getElementById('bg');
 
-function go(screen){
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  $('#'+screen).classList.add('active');
-  document.querySelectorAll('.scroll').forEach(el => el.scrollTop = 0);
+OPTIONS.forEach((o,i)=>{
+  const b=document.createElement('button');
+  b.textContent=i+1;
+  b.onclick=()=>setOption(i);
+  numsEl.appendChild(b);
+});
+
+function setOption(i){
+  idx=(i+OPTIONS.length)%OPTIONS.length;
+  const o=OPTIONS[idx];
+  // apply the background under test to every candidate surface
+  document.documentElement.style.background=o.bg;
+  document.body.style.background=o.bg;
+  bgEl.style.background=o.bg;
+  // update HUD
+  document.getElementById('opt-num').textContent=idx+1;
+  document.getElementById('opt-name').textContent=o.name;
+  document.getElementById('opt-css').textContent=o.css;
+  [...numsEl.children].forEach((b,n)=>b.classList.toggle('active',n===idx));
 }
-function initials(str){
-  const c = str.replace(/[^A-Za-z ]/g,'').trim();
-  return c ? c.split(' ')[0].slice(0,2).toUpperCase() : 'BJ';
-}
+function step(d){ setOption(idx+d); }
 
-function renderHome(){
-  $('#promo-list').innerHTML = PROMOS.map(p => `
-    <button class="promo-row" onclick="openPromo('${p.id}')">
-      <span class="emoji">${p.emoji}</span>
-      <span class="body">
-        <h2>${p.title}</h2>
-        <span class="blurb">${p.blurb}</span>
-        <span class="meta"><span class="chip save">${p.save}</span><span class="chip count">${p.count}</span></span>
-      </span>
-      <span class="chev">&#8250;</span>
-    </button>`).join('');
-}
+// keyboard / remote support: number keys + arrows
+addEventListener('keydown',e=>{
+  if(e.key>='1'&&e.key<=String(OPTIONS.length)) setOption(+e.key-1);
+  else if(e.key==='ArrowRight') step(1);
+  else if(e.key==='ArrowLeft') step(-1);
+});
 
-function openPromo(id){
-  const p = PROMOS.find(x => x.id === id);
-  $('#detail-title').textContent = p.title;
-  $('#detail-lead').innerHTML = p.lead;
-  $('#product-grid').innerHTML = p.products.map((prod,i) => {
-    const stage = `
-      <div class="stage">
-        <span class="tag3d">${p.coupon ? 'CLIP' : '3D'}</span>
-        <div class="glowpad"></div>
-        <img class="pimg" src="${IMG(prod.item,'400')}" alt="${prod.name}" loading="lazy" onerror="${ERR}">
-        <div class="puck">${initials(prod.name)}</div>
-      </div>`;
-    if(p.coupon){
-      return `<button class="prod coupon" onclick="openSheet('${id}',${i})">
-        ${stage}
-        <div class="name">${prod.name}</div>
-        <div class="off">${prod.off}</div>
-        <span class="clip">CLIP TO CARD</span>
-      </button>`;
-    }
-    return `<button class="prod" onclick="openSheet('${id}',${i})">
-      ${stage}
-      <div class="name">${prod.name}</div>
-      <div class="price-row"><span class="price">${prod.price}</span>${prod.save?`<span class="save">${prod.save}</span>`:''}</div>
-      ${prod.flag?`<div class="flag">${prod.flag}</div>`:''}
-    </button>`;
-  }).join('');
-  go('detail');
-}
-
-function openSheet(id,i){
-  const p = PROMOS.find(x => x.id === id);
-  const prod = p.products[i];
-  const img = $('#sheet-img');
-  img.src = IMG(prod.item,'Zoom');
-  img.onerror = function(){ this.style.visibility='hidden'; };
-  $('#sheet-name').textContent = prod.name;
-
-  const saveEl = $('#sheet-save');
-  if(p.coupon){
-    $('#sheet-price').textContent = prod.off;
-    saveEl.style.display='none';
-    $('#sheet-flag').textContent = 'Clip to your card — applies automatically at checkout.';
-    $('#sheet-btn').textContent = 'Clip to Card';
-    $('#sheet-note').textContent = 'CLIPPED SAVINGS · APPLIES AT CHECKOUT';
-  } else {
-    $('#sheet-price').textContent = prod.price;
-    if(prod.save){ saveEl.style.display=''; saveEl.textContent = prod.save; } else { saveEl.style.display='none'; }
-    $('#sheet-flag').textContent = prod.flag || '';
-    $('#sheet-btn').textContent = 'Add to Cart';
-    $('#sheet-note').textContent = prod.model ? 'DRAG TO ROTATE · PINCH TO ZOOM' : '3D MODEL COMING SOON · PHOTO PLACEHOLDER';
-  }
-  /* When a real model exists: if(prod.model){ mountModelViewer(prod.model); } */
-  $('#sheet').classList.add('open');
-}
-function closeSheet(){ $('#sheet').classList.remove('open'); }
-
-renderHome();
+setOption(0);
 </script>
 </body>
 </html>
