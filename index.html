@@ -10,286 +10,189 @@
 <style>
 /* =====================================================================
    BJ's WHOLESALE — Proto Hologram Promo Browser
-   Target device: Proto M / M2  ·  1080 x 1920 (9:16 portrait)
-   Canvas is pure black so lit content "floats" in the holographic volume.
-   All sizing is in container units (cqw / cqh) so the layout is resolution
-   independent: it fills a real 1080x1920 device and previews as a tall
-   device frame anywhere else.
+   Target device: Proto M / M2 · 1080 x 1920 (9:16 portrait)
+
+   HOLOGRAM RULE: on an additive holographic display, only PURE #000000
+   renders as transparent (invisible). Any non-black fill — near-black
+   greys, frosted panels, big glows — emits light and shows as a solid
+   floating block. So every surface here is pure #000; only real content
+   (product photos, text, logo, thin accent glows) carries light and
+   appears to float. Product photos come on white studio backgrounds, so
+   each is radially masked to fade its boxy edges into the void.
    ===================================================================== */
 
 :root{
-  --black:#000000;
   --ink:#ffffff;
-  --muted:rgba(255,255,255,.62);
-  --faint:rgba(255,255,255,.30);
-
-  --bj-red:#d31242;          /* BJ's brand red (matches official logo) */
-  --bj-red-bright:#ff2d5e;   /* holographic bloom / edge glow */
+  --muted:rgba(255,255,255,.60);
+  --faint:rgba(255,255,255,.28);
+  --bj-red:#d31242;          /* BJ's brand red (official logo) */
+  --bj-red-bright:#ff2d5e;   /* holographic glow */
   --gold:#ffc24b;            /* price + savings accent */
-
-  --card:rgba(255,255,255,.045);
-  --card-line:rgba(255,255,255,.10);
-  --card-line-hot:rgba(255,46,77,.55);
+  --line:rgba(255,255,255,.10);
 }
 
 *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
-html,body{height:100%;}
+html,body{height:100%; background:#000;}   /* pure black = transparent on device */
 body{
-  background:#060606;
   font-family:'Inter',system-ui,-apple-system,sans-serif;
   color:var(--ink);
-  display:flex; align-items:center; justify-content:center;
-  overflow:hidden;
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
 }
 
-/* ---- Device frame: locks content to Proto's 9:16 portrait ---- */
+/* Device frame: locks content to Proto's 9:16 portrait */
 .proto-frame{
-  position:relative;
-  aspect-ratio:9 / 16;
-  height:min(100vh,calc(100vw * 16 / 9));
-  width:auto;
-  background:var(--black);
-  overflow:hidden;
-  container-type:size;
-  box-shadow:0 0 0 1px rgba(255,255,255,.05), 0 40px 120px rgba(255,46,77,.10);
+  position:relative; aspect-ratio:9 / 16;
+  height:min(100vh,calc(100vw * 16 / 9)); width:auto;
+  background:#000; overflow:hidden; container-type:size;
 }
 
 /* one screen visible at a time */
 .screen{
-  position:absolute; inset:0;
-  display:flex; flex-direction:column;
-  opacity:0; visibility:hidden;
-  transform:translateY(1.2cqh);
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  opacity:0; visibility:hidden; transform:translateY(1.2cqh);
   transition:opacity .45s ease, transform .45s ease, visibility 0s linear .45s;
 }
-.screen.active{
-  opacity:1; visibility:visible; transform:none;
-  transition:opacity .45s ease, transform .45s ease;
-}
+.screen.active{opacity:1; visibility:visible; transform:none;
+  transition:opacity .45s ease, transform .45s ease;}
 
-/* shared holographic bloom behind hero content */
-.bloom{
-  position:absolute; left:50%; top:0; transform:translateX(-50%);
-  width:120cqw; height:60cqh; pointer-events:none;
-  background:radial-gradient(closest-side, rgba(255,46,77,.28), rgba(228,0,43,.08) 55%, transparent 72%);
-  filter:blur(2px);
-}
-
-/* =========================== LOGO =========================== */
-/* Placeholder wordmark recreated in CSS. Swap for the official
-   BJ's brand asset (SVG/PNG) when you have rights to embed it. */
+/* ===== LOGO (official monogram, reused via <use>) ===== */
 .logo{display:inline-flex; flex-direction:column; align-items:center; line-height:.9;}
-/* Official BJ's monogram, inlined as SVG (single-file, no external asset) */
 .bj-mark{display:block; width:100%; height:auto; aspect-ratio:58 / 51;}
-.logo .sub{
-  margin-top:.5em; font-family:'Archivo',sans-serif; font-weight:700;
-  letter-spacing:.42em; text-indent:.42em; color:var(--muted);
-}
+.logo .sub{margin-top:.5em; font-family:'Archivo',sans-serif; font-weight:700;
+  letter-spacing:.42em; text-indent:.42em; color:var(--muted);}
 
-/* =========================== ATTRACT / LANDING =========================== */
+/* ===== ATTRACT / LANDING ===== */
 #attract{align-items:center; justify-content:center; text-align:center; cursor:pointer; padding:8cqw;}
-#attract .bj-mark{width:36cqw; filter:drop-shadow(0 0 5cqw rgba(211,18,66,.60));}
+#attract .bj-mark{width:34cqw; filter:drop-shadow(0 0 6cqw rgba(255,45,94,.55));}
 #attract .logo .sub{font-size:3.3cqw;}
 #attract .hero-float{animation:floaty 5.5s ease-in-out infinite;}
-#attract .tagline{
-  margin-top:7cqh; font-family:'Archivo',sans-serif; font-weight:800;
-  font-size:9cqw; letter-spacing:-.01em;
-  text-shadow:0 0 6cqw rgba(255,46,77,.35);
-}
+#attract .tagline{margin-top:7cqh; font-family:'Archivo',sans-serif; font-weight:800;
+  font-size:9cqw; letter-spacing:-.01em; text-shadow:0 0 7cqw rgba(255,45,94,.35);}
 #attract .tagline em{color:var(--gold); font-style:normal;}
-#attract .sub-tag{margin-top:1.6cqh; color:var(--muted); font-size:4cqw; max-width:70cqw;}
-#attract .tap{
-  position:absolute; bottom:9cqh; left:50%; transform:translateX(-50%);
+#attract .sub-tag{margin-top:1.6cqh; color:var(--muted); font-size:4cqw; max-width:72cqw;}
+#attract .tap{position:absolute; bottom:9cqh; left:50%; transform:translateX(-50%);
   display:flex; flex-direction:column; align-items:center; gap:2cqh;
-  color:var(--faint); font-size:3.6cqw; letter-spacing:.06em;
-  animation:pulse 2.6s ease-in-out infinite;
-}
-.tap .ring{
-  width:11cqw; height:11cqw; border-radius:50%;
-  border:.5cqw solid rgba(255,255,255,.35);
-  display:grid; place-items:center;
-}
+  color:var(--faint); font-size:3.6cqw; letter-spacing:.06em; animation:pulse 2.6s ease-in-out infinite;}
+.tap .ring{width:11cqw; height:11cqw; border-radius:50%; border:.5cqw solid rgba(255,255,255,.35);
+  display:grid; place-items:center;}
 .tap .ring::after{content:""; width:3.4cqw; height:3.4cqw; border-radius:50%; background:var(--ink); opacity:.8;}
 
-/* =========================== APP HEADER =========================== */
-.app-head{
-  flex:0 0 auto; display:flex; align-items:center; gap:3cqw;
-  padding:5cqh 5cqw 2cqh;
-}
+/* ===== APP HEADER ===== */
+.app-head{flex:0 0 auto; display:flex; align-items:center; gap:3cqw; padding:5cqh 5cqw 2cqh;}
 .app-head .logo{flex-direction:row; align-items:center;}
-.app-head .bj-mark{width:11cqw; filter:drop-shadow(0 0 2.5cqw rgba(211,18,66,.5));}
+.app-head .bj-mark{width:11cqw; filter:drop-shadow(0 0 3cqw rgba(255,45,94,.5));}
 .app-head .logo .sub{display:none;}
-.back{
-  width:9.5cqw; height:9.5cqw; flex:0 0 auto;
-  border-radius:50%; border:.4cqw solid var(--card-line);
-  background:var(--card); color:#fff;
-  display:grid; place-items:center; font-size:5cqw; cursor:pointer;
-  transition:transform .15s ease, border-color .15s ease;
-}
+.back{width:9.5cqw; height:9.5cqw; flex:0 0 auto; border-radius:50%;
+  border:.4cqw solid var(--line); background:#000; color:#fff; display:grid; place-items:center;
+  font-size:5cqw; cursor:pointer; transition:transform .15s ease, border-color .15s ease;}
 .back:active{transform:scale(.9); border-color:var(--bj-red-bright);}
 .head-titles{flex:1 1 auto; min-width:0;}
 .head-eyebrow{font-size:3cqw; letter-spacing:.28em; color:var(--bj-red-bright); font-weight:700;}
-.head-title{font-family:'Archivo',sans-serif; font-weight:800; font-size:6.6cqw; letter-spacing:-.01em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.head-title{font-family:'Archivo',sans-serif; font-weight:800; font-size:6.6cqw; letter-spacing:-.01em;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 
-/* =========================== PROMO HOME =========================== */
-.scroll{flex:1 1 auto; overflow-y:auto; overflow-x:hidden; padding:1cqh 5cqw 6cqh; scrollbar-width:none;}
+/* ===== SCROLL AREA ===== */
+.scroll{flex:1 1 auto; overflow-y:auto; overflow-x:hidden; padding:1cqh 5cqw 8cqh; scrollbar-width:none;}
 .scroll::-webkit-scrollbar{display:none;}
 
+/* ===== PROMO HOME ===== */
 .home-lead{padding:1cqh 0 3cqh;}
 .home-lead h1{font-family:'Archivo',sans-serif; font-weight:900; font-size:11cqw; line-height:.98; letter-spacing:-.02em;}
 .home-lead h1 em{color:var(--gold); font-style:normal;}
 .home-lead p{margin-top:1.4cqh; color:var(--muted); font-size:3.9cqw; max-width:78cqw;}
 
-.promo-card{
-  position:relative; display:block; width:100%; text-align:left; cursor:pointer;
-  border:.4cqw solid var(--card-line); border-radius:4.5cqw;
-  background:
-     linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)),
-     var(--black);
-  padding:5cqw; margin-bottom:3.4cqh; overflow:hidden;
-  transition:transform .18s ease, border-color .18s ease;
-}
-.promo-card:active{transform:scale(.985);}
-.promo-card.hot{border-color:var(--card-line-hot); box-shadow:0 0 9cqw rgba(255,46,77,.16);}
-.promo-card .glow{
-  position:absolute; right:-14cqw; top:-14cqw; width:44cqw; height:44cqw; border-radius:50%;
-  background:radial-gradient(closest-side, var(--pc,rgba(255,46,77,.4)), transparent 72%);
-  pointer-events:none;
-}
-.promo-card .emoji{font-size:8.5cqw; line-height:1;}
-.promo-card h2{font-family:'Archivo',sans-serif; font-weight:800; font-size:6.4cqw; margin-top:1.4cqh; letter-spacing:-.01em;}
-.promo-card .blurb{color:var(--muted); font-size:3.7cqw; margin-top:.8cqh; line-height:1.35; max-width:80cqw;}
-.promo-card .meta{
-  display:flex; align-items:center; gap:2.5cqw; margin-top:2.6cqh;
-}
-.chip{
-  font-size:3cqw; font-weight:700; letter-spacing:.02em;
-  padding:1.1cqh 2.6cqw; border-radius:100px;
-}
-.chip.count{background:rgba(255,255,255,.08); color:#fff;}
+.promo-row{position:relative; display:flex; align-items:flex-start; gap:3.5cqw;
+  width:100%; text-align:left; cursor:pointer; background:transparent; border:none;
+  padding:3.4cqh 0; border-top:.35cqw solid var(--line);
+  transition:opacity .15s ease;}
+.promo-row:active{opacity:.6;}
+.promo-row .emoji{font-size:9cqw; line-height:1; filter:drop-shadow(0 0 3cqw rgba(255,45,94,.35)); flex:0 0 auto;}
+.promo-row .body{flex:1 1 auto; min-width:0;}
+.promo-row h2{font-family:'Archivo',sans-serif; font-weight:800; font-size:6cqw; letter-spacing:-.01em;}
+.promo-row .blurb{color:var(--muted); font-size:3.6cqw; margin-top:.7cqh; line-height:1.34;}
+.promo-row .meta{display:flex; align-items:center; gap:2.4cqw; margin-top:1.9cqh; flex-wrap:wrap;}
+.chip{font-size:3cqw; font-weight:700; padding:1cqh 2.6cqw; border-radius:100px;}
 .chip.save{background:var(--gold); color:#1a1200;}
-.promo-card .go{
-  position:absolute; right:5cqw; bottom:5cqw; width:9cqw; height:9cqw; border-radius:50%;
-  background:var(--bj-red); display:grid; place-items:center; font-size:4.4cqw;
-  box-shadow:0 0 5cqw rgba(255,46,77,.6);
-}
+.chip.count{color:#fff; border:.35cqw solid var(--line);}
+.promo-row .chev{align-self:center; color:var(--bj-red-bright); font-size:6cqw; flex:0 0 auto;
+  filter:drop-shadow(0 0 2cqw rgba(255,45,94,.6));}
 
-/* =========================== PROMO DETAIL (product grid) =========================== */
+/* ===== PROMO DETAIL (product grid) ===== */
 .detail-lead{color:var(--muted); font-size:3.9cqw; line-height:1.4; padding:.5cqh 0 3cqh; max-width:82cqw;}
 .detail-lead strong{color:var(--gold); font-weight:700;}
+.grid{display:grid; grid-template-columns:1fr 1fr; gap:5cqw 4cqw;}
 
-.grid{display:grid; grid-template-columns:1fr 1fr; gap:3.2cqw;}
-.prod{
-  position:relative; text-align:left; cursor:pointer;
-  border:.4cqw solid var(--card-line); border-radius:3.6cqw;
-  background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.012));
-  padding:3.4cqw; overflow:hidden;
-  transition:transform .16s ease, border-color .16s ease;
-}
-.prod:active{transform:scale(.97); border-color:var(--bj-red-bright);}
-/* the "hologram stage" where a 3D product model will live later */
-.stage{
-  position:relative; aspect-ratio:1; border-radius:2.6cqw; overflow:hidden;
-  background:radial-gradient(120% 90% at 50% 20%, rgba(255,46,77,.20), rgba(0,0,0,0) 60%), #000;
-  display:grid; place-items:center;
-}
-.stage .puck{
-  width:48%; height:48%; border-radius:14%;
+.prod{position:relative; text-align:left; cursor:pointer; background:transparent; border:none; padding:0;
+  transition:transform .16s ease;}
+.prod:active{transform:scale(.97);}
+
+/* hologram stage — pure black, product floats with soft red glow + masked edges */
+.stage{position:relative; aspect-ratio:1; display:grid; place-items:center; background:#000; overflow:hidden;}
+.stage .glowpad{position:absolute; width:74%; height:74%; border-radius:50%;
+  background:radial-gradient(closest-side, rgba(255,45,94,.20), rgba(0,0,0,0) 72%); filter:blur(2px);}
+.stage .pimg{position:relative; width:94%; height:94%; object-fit:contain;
+  -webkit-mask-image:radial-gradient(circle at 50% 47%, #000 58%, rgba(0,0,0,0) 82%);
+          mask-image:radial-gradient(circle at 50% 47%, #000 58%, rgba(0,0,0,0) 82%);
+  filter:drop-shadow(0 3cqw 4cqw rgba(0,0,0,.65));
+  animation:floaty 6s ease-in-out infinite;}
+.stage .tag3d{position:absolute; top:1.5cqw; left:1.5cqw; z-index:2; font-size:2.5cqw; font-weight:800;
+  letter-spacing:.12em; padding:.6cqh 1.8cqw; border-radius:100px;
+  background:rgba(0,0,0,.6); border:.35cqw solid rgba(255,255,255,.25); color:var(--muted);}
+/* fallback puck if a product image fails to load */
+.stage .puck{display:none; width:46%; height:46%; border-radius:14%;
   background:linear-gradient(150deg, rgba(255,255,255,.16), rgba(255,255,255,.02));
-  border:.4cqw solid rgba(255,255,255,.14);
-  display:grid; place-items:center; color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:6.5cqw;
-  box-shadow:0 6cqw 10cqw rgba(0,0,0,.6), inset 0 0 6cqw rgba(255,46,77,.25);
-  animation:floaty 6s ease-in-out infinite;
-}
-.stage .reflect{
-  position:absolute; bottom:8%; width:52%; height:6%; border-radius:50%;
-  background:radial-gradient(closest-side, rgba(255,46,77,.5), transparent 70%);
-  filter:blur(1px);
-}
-.stage .tag3d{
-  position:absolute; top:2.4cqw; left:2.4cqw;
-  font-size:2.5cqw; font-weight:800; letter-spacing:.12em;
-  padding:.7cqh 2cqw; border-radius:100px;
-  background:rgba(0,0,0,.55); border:.35cqw solid rgba(255,255,255,.22); color:var(--muted);
-}
-.prod .name{font-size:3.5cqw; font-weight:600; line-height:1.28; margin-top:2.4cqw; min-height:8.8cqw;
+  border:.4cqw solid rgba(255,255,255,.14); place-items:center; color:#fff;
+  font-family:'Archivo',sans-serif; font-weight:900; font-size:7cqw;
+  box-shadow:0 6cqw 10cqw rgba(0,0,0,.6), inset 0 0 6cqw rgba(255,45,94,.25); animation:floaty 6s ease-in-out infinite;}
+
+.prod .name{font-size:3.5cqw; font-weight:600; line-height:1.28; margin-top:1cqh; min-height:8.8cqw;
   display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;}
-.prod .price-row{display:flex; align-items:baseline; gap:2cqw; margin-top:1.4cqw; flex-wrap:wrap;}
+.prod .price-row{display:flex; align-items:baseline; gap:2cqw; margin-top:1cqh; flex-wrap:wrap;}
 .prod .price{font-family:'Archivo',sans-serif; font-weight:900; font-size:6cqw; color:var(--gold);}
 .prod .save{font-size:2.9cqw; font-weight:700; color:#fff; background:var(--bj-red); padding:.5cqh 1.8cqw; border-radius:100px;}
-.prod .flag{margin-top:1.6cqw; font-size:2.8cqw; font-weight:700; letter-spacing:.04em; color:var(--bj-red-bright);}
+.prod .flag{margin-top:1.2cqh; font-size:2.8cqw; font-weight:700; letter-spacing:.03em; color:var(--bj-red-bright);}
+.prod.coupon .off{margin-top:1cqh; font-family:'Archivo',sans-serif; font-weight:900; font-size:5.4cqw; color:var(--gold);}
+.prod.coupon .clip{display:inline-block; margin-top:1cqh; font-size:2.9cqw; font-weight:800; letter-spacing:.08em;
+  color:var(--bj-red-bright); border:.35cqw solid var(--bj-red); border-radius:100px; padding:.7cqh 2.6cqw;}
 
-/* coupon variant */
-.prod.coupon .stage{background:radial-gradient(120% 90% at 50% 30%, rgba(255,194,75,.22), rgba(0,0,0,0) 60%), #000;}
-.prod.coupon .puck{font-size:5cqw; border-radius:12%; animation:none;}
-.prod.coupon .exp{margin-top:1.4cqw; font-size:2.9cqw; color:var(--muted);}
-
-/* =========================== PRODUCT SHEET (3D hook) =========================== */
-#sheet{
-  position:absolute; inset:0; z-index:20;
-  background:rgba(0,0,0,.55); backdrop-filter:blur(6px);
+/* ===== PRODUCT SHEET (3D hook) ===== */
+#sheet{position:absolute; inset:0; z-index:20; background:rgba(0,0,0,.62); backdrop-filter:blur(6px);
   display:flex; flex-direction:column; justify-content:flex-end;
-  opacity:0; visibility:hidden; transition:opacity .3s ease, visibility 0s linear .3s;
-}
+  opacity:0; visibility:hidden; transition:opacity .3s ease, visibility 0s linear .3s;}
 #sheet.open{opacity:1; visibility:visible; transition:opacity .3s ease;}
-.sheet-body{
-  background:linear-gradient(180deg,#0b0b0b,#000);
-  border-top:.5cqw solid var(--card-line-hot);
-  border-radius:7cqw 7cqw 0 0;
-  padding:3cqh 6cqw 5cqh;
-  transform:translateY(4cqh); transition:transform .3s ease;
-  max-height:88%;
-  display:flex; flex-direction:column;
-}
+.sheet-body{background:#000; border-top:.5cqw solid rgba(255,45,94,.55); border-radius:7cqw 7cqw 0 0;
+  padding:3cqh 6cqw 5cqh; transform:translateY(4cqh); transition:transform .3s ease; max-height:90%;
+  display:flex; flex-direction:column;}
 #sheet.open .sheet-body{transform:none;}
 .sheet-grab{width:16cqw; height:1.2cqh; border-radius:100px; background:rgba(255,255,255,.22); margin:0 auto 2.5cqh;}
 
-/* Big hologram stage — replace inner .model-stub with <model-viewer> / three.js canvas */
-.sheet-stage{
-  position:relative; aspect-ratio:1; width:100%; border-radius:5cqw; overflow:hidden;
-  background:radial-gradient(120% 90% at 50% 18%, rgba(255,46,77,.24), rgba(0,0,0,0) 62%), #000;
-  display:grid; place-items:center; margin-bottom:3cqh;
-}
-.sheet-stage .model-stub{
-  width:46%; height:46%; border-radius:16%;
-  background:linear-gradient(150deg, rgba(255,255,255,.18), rgba(255,255,255,.02));
-  border:.4cqw solid rgba(255,255,255,.16);
-  display:grid; place-items:center; color:#fff; font-family:'Archivo',sans-serif; font-weight:900; font-size:11cqw;
-  box-shadow:0 8cqw 16cqw rgba(0,0,0,.6), inset 0 0 8cqw rgba(255,46,77,.3);
-  animation:spin3d 9s linear infinite;
-}
-.sheet-stage .stage-note{
-  position:absolute; bottom:3cqw; left:0; right:0; text-align:center;
-  font-size:2.9cqw; letter-spacing:.1em; color:var(--faint);
-}
-.sheet h3{font-family:'Archivo',sans-serif; font-weight:800; font-size:6.2cqw; line-height:1.15;}
-.sheet .sheet-price{display:flex; align-items:baseline; gap:3cqw; margin-top:2cqh;}
-.sheet .sheet-price .p{font-family:'Archivo',sans-serif; font-weight:900; font-size:11cqw; color:var(--gold);}
-.sheet .sheet-price .s{font-size:3.6cqw; font-weight:700; background:var(--bj-red); padding:.8cqh 3cqw; border-radius:100px;}
-.sheet .sheet-flag{margin-top:1.6cqh; color:var(--bj-red-bright); font-weight:700; font-size:3.4cqw;}
-.sheet .cta{
-  margin-top:auto; padding-top:3cqh;
-}
-.sheet .cta button{
-  width:100%; border:none; cursor:pointer;
-  background:var(--bj-red); color:#fff;
+/* Big hologram stage — swap .model-stage contents for <model-viewer>/three.js when GLBs exist */
+.sheet-stage{position:relative; aspect-ratio:1; width:100%; overflow:hidden; margin-bottom:2.5cqh;
+  display:grid; place-items:center; background:#000;}
+.sheet-stage .glowpad{position:absolute; width:70%; height:70%; border-radius:50%;
+  background:radial-gradient(closest-side, rgba(255,45,94,.22), rgba(0,0,0,0) 72%); filter:blur(3px);}
+.sheet-stage .pimg{position:relative; width:82%; height:82%; object-fit:contain;
+  -webkit-mask-image:radial-gradient(circle at 50% 47%, #000 60%, rgba(0,0,0,0) 84%);
+          mask-image:radial-gradient(circle at 50% 47%, #000 60%, rgba(0,0,0,0) 84%);
+  filter:drop-shadow(0 4cqw 6cqw rgba(0,0,0,.7)); animation:floaty 6.5s ease-in-out infinite;}
+.sheet-stage .stage-note{position:absolute; bottom:1.5cqw; left:0; right:0; text-align:center;
+  font-size:2.8cqw; letter-spacing:.1em; color:var(--faint);}
+.sheet h3{font-family:'Archivo',sans-serif; font-weight:800; font-size:6cqw; line-height:1.15;}
+.sheet .sheet-price{display:flex; align-items:baseline; gap:3cqw; margin-top:1.6cqh; flex-wrap:wrap;}
+.sheet .sheet-price .p{font-family:'Archivo',sans-serif; font-weight:900; font-size:10cqw; color:var(--gold);}
+.sheet .sheet-price .s{font-size:3.4cqw; font-weight:700; background:var(--bj-red); padding:.8cqh 3cqw; border-radius:100px;}
+.sheet .sheet-flag{margin-top:1.4cqh; color:var(--bj-red-bright); font-weight:700; font-size:3.4cqw;}
+.sheet .cta{margin-top:auto; padding-top:3cqh;}
+.sheet .cta button{width:100%; border:none; cursor:pointer; background:var(--bj-red); color:#fff;
   font-family:'Archivo',sans-serif; font-weight:800; font-size:5cqw; letter-spacing:.02em;
-  padding:2.4cqh 0; border-radius:100px;
-  box-shadow:0 0 8cqw rgba(255,46,77,.5);
-  transition:transform .15s ease;
-}
+  padding:2.4cqh 0; border-radius:100px; box-shadow:0 0 8cqw rgba(255,45,94,.5); transition:transform .15s ease;}
 .sheet .cta button:active{transform:scale(.97);}
-.sheet .cta .hint{text-align:center; color:var(--faint); font-size:3cqw; margin-top:1.6cqh;}
+.sheet .cta .hint{text-align:center; color:var(--faint); font-size:3cqw; margin-top:1.4cqh;}
 
-/* =========================== ANIMATIONS =========================== */
-@keyframes floaty{0%,100%{transform:translateY(0)} 50%{transform:translateY(-6%)}}
-@keyframes spin3d{0%{transform:rotateY(0) rotateX(8deg)} 100%{transform:rotateY(360deg) rotateX(8deg)}}
+/* ===== ANIMATIONS ===== */
+@keyframes floaty{0%,100%{transform:translateY(0)} 50%{transform:translateY(-5%)}}
 @keyframes pulse{0%,100%{opacity:.5} 50%{opacity:1}}
-.sheet-stage .model-stub{transform-style:preserve-3d;}
-
-@media (prefers-reduced-motion: reduce){
-  *{animation:none !important;}
-}
+@media (prefers-reduced-motion: reduce){ *{animation:none !important;} }
 </style>
 </head>
 <body>
@@ -309,7 +212,6 @@ body{
 
   <!-- ============== ATTRACT / LANDING ============== -->
   <section class="screen active" id="attract" onclick="go('home')">
-    <div class="bloom"></div>
     <div class="hero-float">
       <div class="logo">
         <svg class="bj-mark" role="img" aria-label="BJ's Wholesale Club"><use href="#bjs-mark"></use></svg>
@@ -318,36 +220,25 @@ body{
     </div>
     <div class="tagline">Today's <em>Deals</em></div>
     <div class="sub-tag">Member savings, in 3D. Browse this week's featured offers.</div>
-    <div class="tap">
-      <div class="ring"></div>
-      <span>TAP TO EXPLORE</span>
-    </div>
+    <div class="tap"><div class="ring"></div><span>TAP TO EXPLORE</span></div>
   </section>
 
   <!-- ============== PROMO HOME ============== -->
   <section class="screen" id="home">
-    <div class="bloom" style="height:34cqh"></div>
     <div class="app-head">
       <div class="logo"><svg class="bj-mark" role="img" aria-label="BJ's Wholesale Club"><use href="#bjs-mark"></use></svg></div>
     </div>
     <div class="scroll">
-      <div class="home-lead">
-        <h1>This Week's<br><em>Savings</em></h1>
-        <p>Tap any event to see the deals inside.</p>
-      </div>
+      <div class="home-lead"><h1>This Week's<br><em>Savings</em></h1><p>Tap any event to see the deals inside.</p></div>
       <div id="promo-list"></div>
     </div>
   </section>
 
   <!-- ============== PROMO DETAIL ============== -->
   <section class="screen" id="detail">
-    <div class="bloom" style="height:30cqh"></div>
     <div class="app-head">
       <button class="back" onclick="go('home')" aria-label="Back">&#8592;</button>
-      <div class="head-titles">
-        <div class="head-eyebrow">BJ'S DEALS</div>
-        <div class="head-title" id="detail-title">Promo</div>
-      </div>
+      <div class="head-titles"><div class="head-eyebrow">BJ'S DEALS</div><div class="head-title" id="detail-title">Promo</div></div>
     </div>
     <div class="scroll">
       <p class="detail-lead" id="detail-lead"></p>
@@ -359,24 +250,20 @@ body{
   <div id="sheet" onclick="if(event.target.id==='sheet') closeSheet()">
     <div class="sheet-body">
       <div class="sheet-grab"></div>
-      <!-- 3D HOOK:
-           Replace .model-stub below with a real 3D viewer once assets exist, e.g.
-           <model-viewer src="models/{sku}.glb" camera-controls auto-rotate ar
+      <!-- 3D HOOK: replace the <img> below with a real 3D viewer when GLBs exist, e.g.
+           <model-viewer src="models/{item}.glb" camera-controls auto-rotate ar
              style="width:100%;height:100%"></model-viewer>
-           or a <canvas> driven by three.js. The product object already carries an
-           optional `model` field to point at the asset. -->
+           Each product already carries an optional `model` field to point at the asset. -->
       <div class="sheet-stage">
-        <div class="model-stub" id="sheet-initial">BJ</div>
-        <div class="stage-note" id="sheet-note">3D MODEL COMING SOON · DRAG TO ROTATE</div>
+        <div class="glowpad"></div>
+        <img class="pimg" id="sheet-img" alt="" />
+        <div class="stage-note" id="sheet-note">3D MODEL COMING SOON · PLACEHOLDER</div>
       </div>
       <h3 id="sheet-name">Product</h3>
-      <div class="sheet-price">
-        <span class="p" id="sheet-price">$0.00</span>
-        <span class="s" id="sheet-save" style="display:none"></span>
-      </div>
+      <div class="sheet-price"><span class="p" id="sheet-price">$0.00</span><span class="s" id="sheet-save" style="display:none"></span></div>
       <div class="sheet-flag" id="sheet-flag"></div>
       <div class="cta">
-        <button onclick="closeSheet()">Add to Cart</button>
+        <button id="sheet-btn" onclick="closeSheet()">Add to Cart</button>
         <div class="hint">Prices reflect current in-club &amp; online offers.</div>
       </div>
     </div>
@@ -386,201 +273,165 @@ body{
 
 <script>
 /* =====================================================================
-   DATA — real BJ's promotions & products pulled from bjs.com (Sep 2026).
-   Each product carries an optional `model` field (path to a .glb) so the
-   product sheet can swap the placeholder stage for a real 3D viewer later.
+   DATA — real BJ's promotions, products, prices & item numbers pulled
+   from bjs.com (Sep 2026). Images are served from BJ's Scene7 CDN by
+   item number. `model` is reserved for a future 3D asset per product.
    ===================================================================== */
+const S7 = 'https://bjs.scene7.com/is/image/bjs/';
+const IMG = (item, size) => `${S7}${item}?$bjs-${size}$`;
+
 const PROMOS = [
-  {
-    id:"labor-day", emoji:"🎉", hot:true, accent:"rgba(255,46,77,.45)",
-    title:"Labor Day Savings Event",
-    blurb:"Long Weekend Deals — up to 40% off + FREE delivery on select, now thru Mon 9/8.",
-    save:"Up to 40% off", count:"8 deals",
+  { id:"labor-day", emoji:"🎉", title:"Labor Day Savings Event",
+    blurb:"Long Weekend Deals — up to 40% off + FREE delivery on select.",
+    save:"Up to 40% off", count:"6 deals",
     lead:"Party-ready grocery and outdoor must-haves for hosting the cookout. <strong>FREE delivery on select items.</strong>",
     products:[
-      {sku:"sealy-esler-q", name:"Sealy Icon Esler Firm Queen Mattress", price:"$599.99", flag:"FREE Delivery Today", model:null},
-      {sku:"samsung-q65c", name:"Samsung HW-Q65C 5.1ch Soundbar w/ Dolby Atmos", price:"$399.99", model:null},
-      {sku:"modluxe-sofa", name:"ModLuxe Modular 3-Pc. Sofa Set", price:"$699.99", flag:"FREE Delivery Today", model:null},
-      {sku:"frigidaire-nugget", name:"Frigidaire 33-lb. Nugget Ice Maker", price:"$159.99", model:null},
-      {sku:"adirondack", name:"Real Comfort Adirondack Chair, Bluestone", price:"$19.99", model:null},
-      {sku:"ballpark-dogs", name:"Ball Park Beef Hot Dogs, 24 ct.", price:"$12.99", save:"$2 off", model:null},
-      {sku:"sunvilla-gazebo", name:"SunVilla 12'x12' Hard Top Gazebo w/ Netting", price:"$999.98", flag:"Clearance · Last Chance", model:null},
-      {sku:"lifetime-chair", name:"Lifetime Folding Chair, Almond", price:"$24.99", flag:"FREE Delivery Today", model:null}
-    ]
-  },
-  {
-    id:"college", emoji:"🎓", accent:"rgba(120,170,255,.4)",
-    title:"College",
+      {item:"341661", name:"Sealy Icon Esler Firm Queen Mattress", price:"$499.99", save:"$100 off", flag:"FREE Delivery Today"},
+      {item:"341214", name:"Sealy Icon Cayson Medium Queen Mattress", price:"$599.99", save:"$100 off"},
+      {item:"343296", name:"Serta Five Star Sleep to Go 10\" Medium (Select Size)", price:"$169.99", save:"$75 off"},
+      {item:"16852",  name:"Pepsi Cola Cans, 36 ct.", price:"$17.09", flag:"Double Coupons"},
+      {item:"336801", name:"Polar Seltzer Variety Pack, 30 pk.", price:"$12.29", save:"$3 off"},
+      {item:"311472", name:"Berkley Jensen Queen Size Foundation", price:"$159.99", flag:"FREE Delivery Today"}
+    ]},
+  { id:"college", emoji:"🎓", title:"College",
     blurb:"Up to 30% off dorm furniture + FREE same-day delivery on select.",
     save:"Up to 30% off", count:"6 deals",
-    lead:"Everything for move-in — furniture, appliances and dorm essentials. <strong>FREE same-day delivery on select.</strong>",
+    lead:"Everything for move-in — furniture, mattresses and dorm essentials. <strong>FREE same-day delivery on select.</strong>",
     products:[
-      {sku:"cassidy-futon", name:"RoomSense Cassidy Futon", price:"$399.99", flag:"FREE Delivery Today", model:null},
-      {sku:"midea-fridge", name:"Midea 2.7-Cu.-Ft. Compact Fridge", price:"$99.99", flag:"FREE Delivery Today", model:null},
-      {sku:"water-dispenser", name:"Commercial Cool Bottom-Loading Water Dispenser", price:"$179.99", model:null},
-      {sku:"aurora-chair", name:"Lounge & Co Aurora 3-in-1 Convertible Chair, Navy", price:"$169.99", model:null},
-      {sku:"camille-twin", name:"Berkley Jensen Camille Twin Mattress", price:"$169.99", flag:"FREE Delivery Today", model:null},
-      {sku:"rize-frame", name:"Rize Universal Bed Frame", price:"$44.99", model:null}
-    ]
-  },
-  {
-    id:"back-to-school", emoji:"✏️", accent:"rgba(255,194,75,.4)",
-    title:"Back to School",
-    blurb:"Back to School deals + FREE shipping on select school supplies and tech.",
+      {item:"311477", name:"Berkley Jensen Camille Twin Size Mattress", price:"$149.99", save:"$20 off", flag:"FREE Delivery Today"},
+      {item:"347562", name:"Zinus 10\" Cooling Gel Plush Hybrid Mattress (Select Size)", price:"$379.99"},
+      {item:"305808", name:"Novaform 12\" Full Cooling Gel Memory Foam Mattress", price:"$229.98"},
+      {item:"342134", name:"Rize Home EZ Foundation Box Spring - King", price:"$179.99"},
+      {item:"347177", name:"Zinus 9\" No Assembly Mattress Foundation (Select Size)", price:"$259.99"},
+      {item:"311470", name:"Berkley Jensen Twin Size Foundation", price:"$139.99", flag:"FREE Delivery Today"}
+    ]},
+  { id:"back-to-school", emoji:"✏️", title:"Back to School",
+    blurb:"Back to School deals + FREE shipping on select supplies and tech.",
     save:"FREE shipping", count:"6 deals",
-    lead:"Stock up on supplies, tech and lunchbox picks. <strong>FREE shipping on select supplies.</strong>",
+    lead:"Stock up on supplies for the year ahead. <strong>FREE shipping on select school supplies.</strong>",
     products:[
-      {sku:"crayola-pencils", name:"Crayola Colored Pencils, 50 ct.", price:"$6.99", flag:"FREE Shipping", model:null},
-      {sku:"sharpie-21", name:"Sharpie Assorted Permanent Markers, 21 ct.", price:"$13.99", flag:"FREE Shipping", model:null},
-      {sku:"pilot-g2", name:"Pilot G2 Gel Pens, 14 ct., Black", price:"$14.99", flag:"FREE Shipping", model:null},
-      {sku:"five-star", name:"Five Star Wirebound Notebook, 2 pk.", price:"$6.49", flag:"FREE Shipping", model:null},
-      {sku:"philips-surge", name:"Philips 6-Outlet Surge Protector, 2 pk.", price:"$29.99", model:null},
-      {sku:"welchs-90", name:"Welch's Fruit Snacks, 90 ct.", price:"$14.99", save:"$3 off", model:null}
-    ]
-  },
-  {
-    id:"halloween", emoji:"🎃", accent:"rgba(255,120,40,.45)",
-    title:"Halloween",
+      {item:"325827", name:"Crayola Colored Pencils, 50 ct.", price:"$5.99", save:"$1 off", flag:"FREE Shipping"},
+      {item:"326235", name:"Sharpie Permanent Markers, Assorted, 21 ct.", price:"$10.99", save:"$3 off", flag:"FREE Shipping"},
+      {item:"330684", name:"Pilot G2 Gel Pens, 14 ct., Black", price:"$12.99", save:"$2 off", flag:"FREE Shipping"},
+      {item:"325825", name:"Five Star Wirebound Notebook, College Ruled, 2 pk.", price:"$4.87", save:"$1.62 off", flag:"FREE Shipping"},
+      {item:"709093", name:"Ticonderoga #2 Sharpened Pencils, 72 ct.", price:"$10.99", flag:"FREE Shipping"},
+      {item:"330475", name:"Westcott 8\" Titanium Bonded Scissors, 3 pk.", price:"$8.99", save:"$1 off", flag:"FREE Shipping"}
+    ]},
+  { id:"halloween", emoji:"🎃", title:"Halloween",
     blurb:"Spooky savings on Halloween candy, decor and party supplies.",
-    save:"Trending", count:"5 deals",
-    lead:"Get ready for the season with candy, decor and party picks. <strong>New arrivals landing weekly.</strong>",
+    save:"Bulk savings", count:"6 deals",
+    lead:"Bulk candy and treats to be the house everyone talks about. <strong>New arrivals landing weekly.</strong>",
     products:[
-      {sku:"playdoh-spooky", name:"Play-Doh Spooky Colors, 30 Pk.", price:"$8.99", flag:"Trending Now", model:null},
-      {sku:"duckalooz", name:"Disney Duckalooz Halloween Multipack, 10 pcs.", price:"$14.99", flag:"Trending Now", model:null},
-      {sku:"rk-spooky", name:"Rice Krispies Treats Spooky Minis, 100 ct.", price:"$12.99", model:null},
-      {sku:"werthers-harvest", name:"Werther's Harvest Caramel Assortment, 28 oz.", price:"$9.99", model:null},
-      {sku:"pirates-pikachu", name:"Pirate's Booty Pikachu Shapes, 17 oz.", price:"$7.49", model:null}
-    ]
-  },
-  {
-    id:"fuel-saver", emoji:"⛽", accent:"rgba(80,220,160,.4)",
-    title:"Fuel Saver Deals",
-    blurb:"Buy tagged items and stack cents-off per gallon at BJ's Gas.",
-    save:"Stack fuel savings", count:"6 deals",
-    lead:"Buy select everyday essentials and earn extra cents off per gallon. <strong>Savings stack with each item.</strong>",
+      {item:"356323", name:"Reese's PB Snack Size Assorted Shapes Candy, 65 ct.", price:"$16.49", flag:"Best Seller"},
+      {item:"326308", name:"M&M's Fun Size Chocolate Candy Variety Pack, 90 ct.", price:"$17.99", save:"$3 off"},
+      {item:"339705", name:"Werther's Limited Edition Harvest Caramel, 28 oz.", price:"$7.99", save:"$2 off"},
+      {item:"356488", name:"Ghirardelli Chocolate Jack-O-Lanterns, 12.4 oz.", price:"$14.99", flag:"New Arrival"},
+      {item:"19312",  name:"Snickers, Twix & More Full-Size Variety, 30 ct.", price:"$29.99", save:"$4 off", flag:"FREE Shipping"},
+      {item:"28371",  name:"Tootsie Roll Pops, 100 ct.", price:"$14.99", save:"$1 off"}
+    ]},
+  { id:"fuel-saver", emoji:"⛽", title:"Fuel Saver Event",
+    blurb:"Shop 100+ participating items. Save 10¢/gal for each one.",
+    save:"10¢/gal each", count:"6 deals",
+    lead:"Buy participating everyday essentials and <strong>save 10¢ per gallon at BJ's Gas for each one</strong> — savings stack.",
     products:[
-      {sku:"tide-170", name:"Tide Liquid Laundry Detergent, Original, 170 oz.", price:"$24.99", save:"$2 off", model:null},
-      {sku:"clorox-wipes", name:"Clorox Disinfecting Wipes, 85 ct./5 pk.", price:"$19.99", save:"$3.50 off", model:null},
-      {sku:"fusion5", name:"Gillette Fusion5 Blade Refills, 16 ct.", price:"$48.99", save:"$8 off", model:null},
-      {sku:"vital-collagen", name:"Vital Proteins Collagen Peptides, 24 oz.", price:"$34.99", save:"$5 off", model:null},
-      {sku:"energizer-aa48", name:"Energizer MAX AA Batteries, 48 pk.", price:"$27.99", save:"$2 off", model:null},
-      {sku:"cottonelle-36", name:"Cottonelle Ultra Soft Toilet Paper, 36 rolls", price:"$24.99", flag:"Double Coupons", model:null}
-    ]
-  },
-  {
-    id:"flavors-of-fall", emoji:"🍂", accent:"rgba(255,140,60,.4)",
-    title:"Flavors of Fall",
-    blurb:"Member favorites for the season — grill, snack and stock up.",
-    save:"Member favorites", count:"5 deals",
-    lead:"Seasonal member favorites, from grilling staples to snack-time picks.",
+      {item:"241915", name:"Clorox Disinfecting Wipes Value Pack, 85 ct./5 pk.", price:"$18.99", save:"$3.50 off"},
+      {item:"16852",  name:"Pepsi Cola Cans, 36 ct.", price:"$17.09", flag:"Double Coupons"},
+      {item:"38045",  name:"Coca-Cola Soda Cans, 35 pk./12 fl. oz.", price:"$19.29"},
+      {item:"235070", name:"Welch's Fruit Snacks, Snack Packs, 90 ct.", price:"$12.99", save:"$3 off"},
+      {item:"53620",  name:"Wellsley Farms Purified Water, 40 pk.", price:"$3.99"},
+      {item:"28541",  name:"Kool-Aid Jammers Variety Pack, 40 pk.", price:"$9.99", save:"$1.50 off"}
+    ]},
+  { id:"flavors-of-fall", emoji:"🍂", title:"Flavors of Fall",
+    blurb:"Member favorites for the season — snack and stock up.",
+    save:"Member favorites", count:"6 deals",
+    lead:"Seasonal member favorites, from bakery treats to pantry staples.",
     products:[
-      {sku:"kingsford-2x20", name:"Kingsford Charcoal Briquettes, 2 × 20 lbs.", price:"$24.99", save:"$1.50 off", model:null},
-      {sku:"pre-nystrip", name:"Pre Brands Grass-Fed NY Strip Steaks, 2 pk.", price:"$23.99", model:null},
-      {sku:"philly-6", name:"Philadelphia Original Cream Cheese, 6 pk.", price:"$13.79", model:null},
-      {sku:"pepsi-36", name:"Pepsi Cola Cans, 36 ct.", price:"$15.99", flag:"Double Coupons", model:null},
-      {sku:"gatorade-24", name:"Gatorade Sports Drinks Variety Pack, 24 pk.", price:"$26.99", model:null}
-    ]
-  },
-  {
-    id:"new-trending", emoji:"🔥", accent:"rgba(255,46,77,.42)",
-    title:"New & Trending",
-    blurb:"Fresh arrivals across grocery, home and wellness.",
-    save:"Just landed", count:"5 deals",
-    lead:"The newest picks members are loving right now.",
+      {item:"312395", name:"Wellsley Farms Fall Brownie Platter, 15 ct.", price:"$7.99"},
+      {item:"357275", name:"Graza Sizzle Extra Virgin Olive Oil, 1L", price:"$16.49", save:"$2 off"},
+      {item:"19256",  name:"Honey Maid Honey Graham Crackers, 4 pk.", price:"$8.99", save:"$2 off"},
+      {item:"355870", name:"Ghirardelli Milk & Dark Chocolate Squares, 15.7 oz.", price:"$14.99"},
+      {item:"34998",  name:"Deer Park 100% Natural Spring Water, 40 pk.", price:"$6.99"},
+      {item:"24925",  name:"York Dark Chocolate Peppermint Patties, 175 pk.", price:"$23.99"}
+    ]},
+  { id:"new-trending", emoji:"🔥", title:"New & Trending",
+    blurb:"Fresh arrivals members are loving right now.",
+    save:"Just landed", count:"6 deals",
+    lead:"The newest picks across grocery, home and pop culture.",
     products:[
-      {sku:"graza-sizzle", name:"Graza Sizzle Extra Virgin Olive Oil, 1L", price:"$16.49", save:"$2 off", model:null},
-      {sku:"pg-eggs-18", name:"Pete & Gerry's Organic Large Brown Eggs, 18 ct.", price:"$9.49", model:null},
-      {sku:"orgain-collagen", name:"Orgain Grass-Fed Collagen + Creatine, 1.95 lbs.", price:"$32.99", save:"$5 off", model:null},
-      {sku:"sambazon-acai", name:"Sambazon Organic Scoopable Acai, 85 fl. oz.", price:"$18.99", save:"$3 off", model:null},
-      {sku:"wise-42", name:"Wise Multi-Snack Variety Pack, 42 ct.", price:"$14.99", model:null}
-    ]
-  },
-  {
-    id:"coupons", emoji:"✂️", accent:"rgba(255,194,75,.45)", coupon:true,
-    title:"Trending Coupons",
+      {item:"352940", name:"Netflix KPop Demon Hunters School Supply Kit, 8-Pc.", price:"$9.99", save:"$10 off", flag:"New"},
+      {item:"356488", name:"Ghirardelli Chocolate Jack-O-Lanterns, 12.4 oz.", price:"$14.99", flag:"New Arrival"},
+      {item:"355271", name:"Snickers Satisfying Mix Full-Size Bars, 12 ct.", price:"$10.99", save:"$2 off", flag:"New"},
+      {item:"357275", name:"Graza Sizzle Extra Virgin Olive Oil, 1L", price:"$16.49", save:"$2 off"},
+      {item:"356272", name:"Fiorella Assorted Milk Chocolate Premium, 17.64 oz.", price:"$14.99", flag:"New"},
+      {item:"356036", name:"Crayola Young Kids 2-in-1 Doodle Board", price:"$8.99", save:"$4 off", flag:"New"}
+    ]},
+  { id:"coupons", emoji:"✂️", coupon:true, title:"Trending Coupons",
     blurb:"Clip to card — savings apply automatically at checkout.",
     save:"Clip & save", count:"6 coupons",
     lead:"Clip these to your membership card and they apply automatically in-club, online or in the app.",
     products:[
-      {sku:"tide-pods", name:"Tide PODS Free & Gentle 152 ct. or Original 168 ct.", price:"$3 off", exp:"Exp 09/09/26", model:null},
-      {sku:"aspen-plates", name:"Aspen 9\" Heavy Duty Paper Plates, 600 ct.", price:"$2 off", exp:"Exp 09/24/26", model:null},
-      {sku:"lemon-perfect", name:"Lemon Perfect Variety Pack, 15 pk.", price:"$4 off", exp:"Exp 09/20/26", model:null},
-      {sku:"energizer-coupon", name:"Energizer MAX AA 48 pk. or AAA 48 pk.", price:"$2 off", exp:"Exp 09/20/26", model:null},
-      {sku:"huggies", name:"Huggies Little Movers Plus Diapers", price:"$3 off", exp:"Exp 09/30/26", model:null},
-      {sku:"always-tampax", name:"Always Pads/Liners or Tampax Tampons", price:"$3 off", exp:"Exp 09/09/26", model:null}
-    ]
-  }
+      {item:"326308", name:"M&M's Fun Size Chocolate Variety Pack, 90 ct.", off:"$3.00 off"},
+      {item:"343327", name:"Hershey Assorted Milk Chocolate Value Pack, 210 ct.", off:"$2.50 off"},
+      {item:"241915", name:"Clorox Disinfecting Wipes, 85 ct./5 pk.", off:"$3.50 off"},
+      {item:"235070", name:"Welch's Fruit Snacks, 90 ct.", off:"$3.00 off"},
+      {item:"326235", name:"Sharpie Permanent Markers, 21 ct.", off:"$3.00 off"},
+      {item:"226479", name:"Tootsie Roll Favorites Variety Pack, 4.75 lbs.", off:"$1.00 off"}
+    ]}
 ];
 
-/* =====================================================================
-   RENDER + ROUTER
-   ===================================================================== */
+/* ===== RENDER + ROUTER ===== */
 const $ = s => document.querySelector(s);
-let currentPromo = null;
+const ERR = "this.style.display='none';this.parentNode.querySelector('.puck').style.display='grid';";
 
 function go(screen){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $('#'+screen).classList.add('active');
-  $('.scroll') && document.querySelectorAll('.scroll').forEach(el => el.scrollTop = 0);
+  document.querySelectorAll('.scroll').forEach(el => el.scrollTop = 0);
 }
-
-function initial(str){
-  // a short glyph for the placeholder puck: brand mark or first letters
-  const clean = str.replace(/[^A-Za-z ]/g,'').trim();
-  return clean ? clean.split(' ')[0].slice(0,2).toUpperCase() : 'BJ';
+function initials(str){
+  const c = str.replace(/[^A-Za-z ]/g,'').trim();
+  return c ? c.split(' ')[0].slice(0,2).toUpperCase() : 'BJ';
 }
 
 function renderHome(){
-  const list = $('#promo-list');
-  list.innerHTML = PROMOS.map(p => `
-    <button class="promo-card ${p.hot?'hot':''}" style="--pc:${p.accent}" onclick="openPromo('${p.id}')">
-      <div class="glow"></div>
-      <div class="emoji">${p.emoji}</div>
-      <h2>${p.title}</h2>
-      <div class="blurb">${p.blurb}</div>
-      <div class="meta">
-        <span class="chip save">${p.save}</span>
-        <span class="chip count">${p.count}</span>
-      </div>
-      <div class="go">&#8594;</div>
-    </button>
-  `).join('');
+  $('#promo-list').innerHTML = PROMOS.map(p => `
+    <button class="promo-row" onclick="openPromo('${p.id}')">
+      <span class="emoji">${p.emoji}</span>
+      <span class="body">
+        <h2>${p.title}</h2>
+        <span class="blurb">${p.blurb}</span>
+        <span class="meta"><span class="chip save">${p.save}</span><span class="chip count">${p.count}</span></span>
+      </span>
+      <span class="chev">&#8250;</span>
+    </button>`).join('');
 }
 
 function openPromo(id){
   const p = PROMOS.find(x => x.id === id);
-  currentPromo = p;
   $('#detail-title').textContent = p.title;
   $('#detail-lead').innerHTML = p.lead;
-  const grid = $('#product-grid');
-  grid.innerHTML = p.products.map((prod,i) => {
+  $('#product-grid').innerHTML = p.products.map((prod,i) => {
+    const stage = `
+      <div class="stage">
+        <span class="tag3d">${p.coupon ? 'CLIP' : '3D'}</span>
+        <div class="glowpad"></div>
+        <img class="pimg" src="${IMG(prod.item,'400')}" alt="${prod.name}" loading="lazy" onerror="${ERR}">
+        <div class="puck">${initials(prod.name)}</div>
+      </div>`;
     if(p.coupon){
-      return `
-      <button class="prod coupon" onclick="openSheet('${id}',${i})">
-        <div class="stage">
-          <span class="tag3d">CLIP</span>
-          <div class="puck">${initial(prod.name)}</div>
-          <div class="reflect"></div>
-        </div>
+      return `<button class="prod coupon" onclick="openSheet('${id}',${i})">
+        ${stage}
         <div class="name">${prod.name}</div>
-        <div class="price-row"><span class="price">${prod.price}</span></div>
-        <div class="exp">${prod.exp||''}</div>
+        <div class="off">${prod.off}</div>
+        <span class="clip">CLIP TO CARD</span>
       </button>`;
     }
-    return `
-      <button class="prod" onclick="openSheet('${id}',${i})">
-        <div class="stage">
-          <span class="tag3d">3D</span>
-          <div class="puck">${initial(prod.name)}</div>
-          <div class="reflect"></div>
-        </div>
-        <div class="name">${prod.name}</div>
-        <div class="price-row">
-          <span class="price">${prod.price}</span>
-          ${prod.save?`<span class="save">${prod.save}</span>`:''}
-        </div>
-        ${prod.flag?`<div class="flag">${prod.flag}</div>`:''}
-      </button>`;
+    return `<button class="prod" onclick="openSheet('${id}',${i})">
+      ${stage}
+      <div class="name">${prod.name}</div>
+      <div class="price-row"><span class="price">${prod.price}</span>${prod.save?`<span class="save">${prod.save}</span>`:''}</div>
+      ${prod.flag?`<div class="flag">${prod.flag}</div>`:''}
+    </button>`;
   }).join('');
   go('detail');
 }
@@ -588,30 +439,26 @@ function openPromo(id){
 function openSheet(id,i){
   const p = PROMOS.find(x => x.id === id);
   const prod = p.products[i];
+  const img = $('#sheet-img');
+  img.src = IMG(prod.item,'Zoom');
+  img.onerror = function(){ this.style.visibility='hidden'; };
   $('#sheet-name').textContent = prod.name;
-  $('#sheet-price').textContent = prod.price;
-  $('#sheet-initial').textContent = initial(prod.name);
 
   const saveEl = $('#sheet-save');
-  if(prod.save){ saveEl.style.display=''; saveEl.textContent = prod.save; }
-  else { saveEl.style.display='none'; }
-
-  const flagEl = $('#sheet-flag');
-  flagEl.textContent = prod.flag || prod.exp || '';
-
-  const btn = document.querySelector('#sheet .cta button');
-  const note = $('#sheet-note');
   if(p.coupon){
-    btn.textContent = 'Clip to Card';
-    note.textContent = 'CLIPPED SAVINGS · APPLIES AT CHECKOUT';
+    $('#sheet-price').textContent = prod.off;
+    saveEl.style.display='none';
+    $('#sheet-flag').textContent = 'Clip to your card — applies automatically at checkout.';
+    $('#sheet-btn').textContent = 'Clip to Card';
+    $('#sheet-note').textContent = 'CLIPPED SAVINGS · APPLIES AT CHECKOUT';
   } else {
-    btn.textContent = 'Add to Cart';
-    note.textContent = prod.model ? 'DRAG TO ROTATE · PINCH TO ZOOM' : '3D MODEL COMING SOON · PLACEHOLDER';
+    $('#sheet-price').textContent = prod.price;
+    if(prod.save){ saveEl.style.display=''; saveEl.textContent = prod.save; } else { saveEl.style.display='none'; }
+    $('#sheet-flag').textContent = prod.flag || '';
+    $('#sheet-btn').textContent = 'Add to Cart';
+    $('#sheet-note').textContent = prod.model ? 'DRAG TO ROTATE · PINCH TO ZOOM' : '3D MODEL COMING SOON · PHOTO PLACEHOLDER';
   }
-
-  /* When a real model exists, this is where you'd mount the 3D viewer:
-     if(prod.model){ mountModelViewer(prod.model); } */
-
+  /* When a real model exists: if(prod.model){ mountModelViewer(prod.model); } */
   $('#sheet').classList.add('open');
 }
 function closeSheet(){ $('#sheet').classList.remove('open'); }
